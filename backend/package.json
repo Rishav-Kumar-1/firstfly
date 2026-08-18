@@ -1,0 +1,15 @@
+{
+  "name": "travelgo-backend",
+  "version": "1.0.0",
+  "description": "TravelGo Travel Vehicle Booking Platform - Backend API",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["travel", "booking", "express", "nodejs"],
+  "author": "TravelGo",
+  "license": "ISC"
+}
