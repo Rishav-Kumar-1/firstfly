@@ -10,6 +10,7 @@ import VehicleDetails from './pages/VehicleDetails'
 import Packages from './pages/Packages'
 import PackageDetails from './pages/PackageDetails'
 import Destinations from './pages/Destinations'
+import DestinationDetail from './pages/DestinationDetail'
 import Booking from './pages/Booking'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -67,6 +68,9 @@ function App() {
 
         <Route path="/destinations" element={
           <PublicLayout><Destinations /></PublicLayout>
+        } />
+        <Route path="/destinations/:id" element={
+          <PublicLayout><DestinationDetail /></PublicLayout>
         } />
         <Route path="/about" element={
           <PublicLayout><About /></PublicLayout>

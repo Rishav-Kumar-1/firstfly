@@ -402,7 +402,7 @@ export default function Home() {
             ].map((dest) => (
               <Link
                 key={dest.name}
-                to={`/destinations?q=${dest.name}`}
+                to={`/destinations`}
                 className={`relative bg-gradient-to-br ${dest.color} rounded-2xl p-6 text-white hover:scale-105 transition-transform duration-300 cursor-pointer shadow-md`}
               >
                 <div className="text-3xl mb-2">{dest.emoji}</div>
