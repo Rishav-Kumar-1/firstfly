@@ -9,6 +9,7 @@ export default defineConfig({
     tailwindcss(), // Enables Tailwind CSS in the project
   ],
   server: {
-    port: 5173, // Frontend runs on http://localhost:5173
+    port: 5173,        // Always use 5173
+    strictPort: true,  // Fail instead of picking a random port — keeps CORS predictable
   },
 })

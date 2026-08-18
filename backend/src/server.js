@@ -12,8 +12,22 @@ const app = express();
 // MIDDLEWARE
 // ─────────────────────────────────────────────
 app.use(helmet());
+// CORS — allow the frontend to talk to this backend
+// In development we allow all localhost ports so port conflicts don't break things
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (Postman, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    // Allow any localhost origin in development
+    if (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+    // In production, only allow the configured frontend URL
+    if (origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(express.json());
