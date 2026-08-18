@@ -73,6 +73,8 @@ export const authAPI = {
   login: (data: object) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
   getProfile: () => api.get('/auth/profile'),
+  updateProfile: (data: object) => api.put('/auth/profile', data),
+  changePassword: (data: object) => api.put('/auth/change-password', data),
 };
 
 // ─────────────────────────────────────────────
@@ -115,6 +117,7 @@ export const reviewAPI = {
 // ─────────────────────────────────────────────
 export const enquiryAPI = {
   submit: (data: object) => api.post('/enquiries', data),
+  getAll: () => api.get('/enquiries'),
 };
 
 // Admin APIs
@@ -124,7 +127,7 @@ export const adminAPI = {
   updateBookingStatus: (id: number, status: string) =>
     api.put(`/admin/bookings/${id}/status`, { status }),
   getAllCustomers: () => api.get('/admin/customers'),
-  getAllEnquiries: () => api.get('/admin/enquiries'),
+  getAllEnquiries: () => api.get('/enquiries'),
 };
 
 export default api;

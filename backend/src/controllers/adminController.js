@@ -28,7 +28,7 @@ const getDashboard = async (req, res) => {
         COALESCE(SUM(total_amount), 0) AS revenue
       FROM bookings
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m'), DATE_FORMAT(created_at, '%b %Y')
       ORDER BY MIN(created_at) ASC
     `);
 

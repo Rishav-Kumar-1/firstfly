@@ -76,19 +76,16 @@ function App() {
         } />
 
         {/* ── Auth Routes ── */}
-        <Route path="/login" element={
-          <PublicLayout><Login /></PublicLayout>
-        } />
-        <Route path="/register" element={
-          <PublicLayout><Register /></PublicLayout>
-        } />
+        {/* Login and Register have their own full-page layout, no Navbar/Footer wrapper */}
+        <Route path="/login"    element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* ── Protected Customer Routes ── */}
         {/* ProtectedRoute checks if the user is logged in */}
         {/* If not, it redirects to /login automatically */}
         <Route path="/booking" element={
           <ProtectedRoute>
-            <PublicLayout><Booking /></PublicLayout>
+            <Booking />
           </ProtectedRoute>
         } />
         <Route path="/dashboard" element={
