@@ -1,51 +1,127 @@
-// App.tsx — The root component of our React application
-// This is where we define all the "pages" and which URL shows which page
-// Think of it as the "table of contents" for the entire app
+// App.tsx — Root component defining all routes for TravelGo
 
 import { Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 
-// We'll create these pages in Phase 3 onwards
-// For now, we create simple placeholder pages to confirm routing works
+// Pages
+import Home from './pages/Home'
+import Vehicles from './pages/Vehicles'
+import VehicleDetails from './pages/VehicleDetails'
+import Packages from './pages/Packages'
+import PackageDetails from './pages/PackageDetails'
+import Destinations from './pages/Destinations'
+import Booking from './pages/Booking'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import MyBookings from './pages/MyBookings'
+import Profile from './pages/Profile'
+import Dashboard from './pages/Dashboard'
+import About from './pages/About'
+import Contact from './pages/Contact'
+import NotFound from './pages/NotFound'
 
-function Home() {
+// Admin Pages
+import AdminLogin from './admin/AdminLogin'
+import AdminDashboard from './admin/AdminDashboard'
+
+// Components
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import ProtectedRoute from './components/ProtectedRoute'
+
+// Layout wrapper: Navbar + page content + Footer
+// Used for all public-facing pages
+function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center">
-      <div className="text-center text-white px-4">
-        <h1 className="text-5xl font-bold mb-4">🚌 TravelGo</h1>
-        <p className="text-xl mb-2">Travel Vehicle & Tour Booking Platform</p>
-        <p className="text-blue-200 mb-8">Travel Together. Travel Better.</p>
-        <div className="bg-white/20 rounded-xl p-6 backdrop-blur-sm">
-          <p className="text-green-300 font-semibold text-lg">✅ Phase 1 Complete!</p>
-          <p className="text-white/80 mt-2">Frontend is running on React + Vite + Tailwind</p>
-          <p className="text-white/80">Backend will be connected in Phase 6</p>
-        </div>
-      </div>
-    </div>
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
   )
 }
 
-function NotFound() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-300">404</h1>
-        <p className="text-xl text-gray-600 mt-4">Page not found</p>
-        <a href="/" className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-          Go Home
-        </a>
-      </div>
-    </div>
-  )
-}
-
-// Routes tell React: "when the URL is /xxx, show this component"
-// The * at the end means "anything that didn't match above"
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    // AuthProvider wraps the entire app so every component can access auth state
+    <AuthProvider>
+      <Routes>
+
+        {/* ── Public Routes ── */}
+        {/* Home has its own Navbar/Footer built-in for the special hero layout */}
+        <Route path="/" element={<Home />} />
+
+        <Route path="/vehicles" element={
+          <PublicLayout><Vehicles /></PublicLayout>
+        } />
+        <Route path="/vehicles/:id" element={
+          <PublicLayout><VehicleDetails /></PublicLayout>
+        } />
+
+        <Route path="/packages" element={
+          <PublicLayout><Packages /></PublicLayout>
+        } />
+        <Route path="/packages/:id" element={
+          <PublicLayout><PackageDetails /></PublicLayout>
+        } />
+
+        <Route path="/destinations" element={
+          <PublicLayout><Destinations /></PublicLayout>
+        } />
+        <Route path="/about" element={
+          <PublicLayout><About /></PublicLayout>
+        } />
+        <Route path="/contact" element={
+          <PublicLayout><Contact /></PublicLayout>
+        } />
+
+        {/* ── Auth Routes ── */}
+        <Route path="/login" element={
+          <PublicLayout><Login /></PublicLayout>
+        } />
+        <Route path="/register" element={
+          <PublicLayout><Register /></PublicLayout>
+        } />
+
+        {/* ── Protected Customer Routes ── */}
+        {/* ProtectedRoute checks if the user is logged in */}
+        {/* If not, it redirects to /login automatically */}
+        <Route path="/booking" element={
+          <ProtectedRoute>
+            <PublicLayout><Booking /></PublicLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <PublicLayout><Dashboard /></PublicLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/my-bookings" element={
+          <ProtectedRoute>
+            <PublicLayout><MyBookings /></PublicLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <PublicLayout><Profile /></PublicLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* ── Admin Routes ── */}
+        {/* adminOnly={true} means only ADMIN role can access */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={
+          <ProtectedRoute adminOnly>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* ── 404 Catch-all ── */}
+        {/* The * matches any URL that didn't match above */}
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+    </AuthProvider>
   )
 }
 
