@@ -20,6 +20,7 @@ import Dashboard from './pages/Dashboard'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
+import Payment from './pages/Payment'
 
 // Admin Pages
 import AdminLogin from './admin/AdminLogin'
@@ -105,6 +106,11 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <PublicLayout><Profile /></PublicLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/payment/:id" element={
+          <ProtectedRoute>
+            <Payment />
           </ProtectedRoute>
         } />
 

@@ -130,4 +130,13 @@ export const adminAPI = {
   getAllEnquiries: () => api.get('/enquiries'),
 };
 
+// ─────────────────────────────────────────────
+// PAYMENT APIs (Razorpay)
+// ─────────────────────────────────────────────
+export const paymentAPI = {
+  createOrder:   (data: object) => api.post('/payments/create-order', data),
+  verifyPayment: (data: object) => api.post('/payments/verify', data),
+  getStatus:     (bookingId: number) => api.get(`/payments/booking/${bookingId}`),
+};
+
 export default api;

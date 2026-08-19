@@ -9,7 +9,28 @@
     "dev": "nodemon src/server.js",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": ["travel", "booking", "express", "nodejs"],
+  "keywords": [
+    "travel",
+    "booking",
+    "express",
+    "nodejs"
+  ],
   "author": "TravelGo",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "mysql2": "^3.23.3",
+    "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }

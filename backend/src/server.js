@@ -47,6 +47,7 @@ const packageRoutes     = require('./routes/packageRoutes');
 const destinationRoutes = require('./routes/destinationRoutes');
 const enquiryRoutes     = require('./routes/enquiryRoutes');
 const adminRoutes       = require('./routes/adminRoutes');
+const paymentRoutes     = require('./routes/paymentRoutes');
 
 app.use('/api/auth',         authRoutes);
 app.use('/api/vehicles',     vehicleRoutes);
@@ -55,6 +56,7 @@ app.use('/api/packages',     packageRoutes);
 app.use('/api/destinations', destinationRoutes);
 app.use('/api/enquiries',    enquiryRoutes);
 app.use('/api/admin',        adminRoutes);
+app.use('/api/payments',     paymentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

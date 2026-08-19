@@ -196,6 +196,12 @@ export default function Dashboard() {
                           className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
                           View
                         </Link>
+                        {booking.payment_status === 'PENDING' && booking.booking_status !== 'CANCELLED' && (
+                          <Link to={`/payment/${booking.id}`}
+                            className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                            Pay Now
+                          </Link>
+                        )}
                         {['PENDING', 'CONFIRMED'].includes(booking.booking_status) && (
                           <button
                             onClick={() => handleCancel(booking.id)}
