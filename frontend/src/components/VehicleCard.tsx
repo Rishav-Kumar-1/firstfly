@@ -10,8 +10,17 @@ interface VehicleCardProps {
 }
 
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
-  // Placeholder image if no image is provided
-  const imageSrc = vehicle.image_url || 'https://placehold.co/400x250/e2e8f0/94a3b8?text=Vehicle';
+  // Real vehicle images based on type
+  const fallbackImages: Record<string, string> = {
+    'Traveller': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80',
+    'SUV':       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80',
+    'Sedan':     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80',
+    'Tempo':     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+    'Bus':       'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80',
+  };
+  const imageSrc = vehicle.image_url?.startsWith('https://placehold.co')
+    ? (fallbackImages[vehicle.vehicle_type] || fallbackImages['Traveller'])
+    : (vehicle.image_url || fallbackImages['Traveller']);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
@@ -20,9 +29,9 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
         <img
           src={imageSrc}
           alt={vehicle.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://placehold.co/400x250/e2e8f0/94a3b8?text=Vehicle';
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80';
           }}
         />
         {/* Status Badge */}
