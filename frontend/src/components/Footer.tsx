@@ -1,81 +1,62 @@
-// Footer.tsx — Professional footer
-
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const year = new Date().getFullYear();
-
   return (
-    <footer className="bg-gray-950 text-gray-400">
-      {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer style={{ background: '#0f172a', fontFamily: 'Inter,system-ui,sans-serif' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-black text-xl" style={{fontFamily:'Poppins,sans-serif'}}>T</span>
-              </div>
-              <span className="text-white font-black text-2xl" style={{fontFamily:'Poppins,sans-serif'}}>TravelGo</span>
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xl"
+                style={{ background: 'linear-gradient(135deg,#2563eb,#6366f1)', fontFamily: 'Poppins,sans-serif' }}>T</div>
+              <span className="font-black text-xl text-white" style={{ fontFamily: 'Poppins,sans-serif' }}>TravelGo</span>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed mb-5">
-              India's trusted platform for booking comfortable group travel vehicles.
-              Verified drivers. Transparent pricing. Memorable journeys.
+            <p style={{ color: '#94a3b8', lineHeight: '1.7', fontSize: '0.875rem' }} className="mb-5">
+              India's trusted platform for booking comfortable travel vehicles. Verified drivers.
+              Transparent pricing. Memorable journeys.
             </p>
-            {/* Social */}
-            <div className="flex gap-3">
-              {[
-                { label: 'f', title: 'Facebook' },
-                { label: 'in', title: 'Instagram' },
-                { label: '▶', title: 'YouTube' },
-                { label: 'tw', title: 'Twitter' },
-              ].map(s => (
-                <a key={s.title} href="#" title={s.title}
-                  className="w-9 h-9 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold text-gray-400 hover:text-white transition-all duration-200">
-                  {s.label}
+            <div className="flex gap-2">
+              {['FB','IG','TW','YT'].map(s => (
+                <a key={s} href="#"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold transition-colors"
+                  style={{ background: '#1e293b', color: '#94a3b8' }}
+                  onMouseOver={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseOut={e => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.color = '#94a3b8'; }}>
+                  {s}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Links */}
           <div>
-            <h3 className="text-white font-bold text-base mb-5">Quick Links</h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Home',           to: '/' },
-                { label: 'Our Vehicles',   to: '/vehicles' },
-                { label: 'Tour Packages',  to: '/packages' },
-                { label: 'Destinations',   to: '/destinations' },
-                { label: 'About Us',       to: '/about' },
-                { label: 'Contact',        to: '/contact' },
-              ].map(link => (
-                <li key={link.to}>
-                  <Link to={link.to} className="text-gray-500 hover:text-white text-sm transition-colors flex items-center gap-2">
-                    <span className="text-blue-500 text-xs">▸</span> {link.label}
+            <h4 className="font-bold text-white text-sm mb-4">Quick Links</h4>
+            <ul className="space-y-2.5">
+              {[['/', 'Home'], ['/vehicles', 'Vehicles'], ['/packages', 'Tour Packages'],
+                ['/destinations', 'Destinations'], ['/about', 'About Us'], ['/contact', 'Contact']].map(([to, label]) => (
+                <li key={to}>
+                  <Link to={to} style={{ color: '#94a3b8', fontSize: '0.875rem' }}
+                    className="hover:text-white transition-colors flex items-center gap-2">
+                    <span style={{ color: '#3b82f6' }}>›</span> {label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Vehicles */}
+          {/* Fleet */}
           <div>
-            <h3 className="text-white font-bold text-base mb-5">Our Fleet</h3>
-            <ul className="space-y-3">
-              {[
-                '9 Seater Traveller',
-                '12 Seater Traveller',
-                '16 Seater Traveller',
-                '20 Seater Traveller',
-                'Luxury Tempo Traveller',
-                'Innova Crysta',
-                'Sedan / Dzire',
-              ].map(v => (
+            <h4 className="font-bold text-white text-sm mb-4">Our Fleet</h4>
+            <ul className="space-y-2.5">
+              {['9 Seater Traveller','12 Seater Traveller','16 Seater Traveller',
+                '20 Seater Traveller','Luxury Tempo','Innova Crysta','Sedan / SUV'].map(v => (
                 <li key={v}>
-                  <Link to="/vehicles" className="text-gray-500 hover:text-white text-sm transition-colors flex items-center gap-2">
-                    <span className="text-blue-500 text-xs">▸</span> {v}
+                  <Link to="/vehicles" style={{ color: '#94a3b8', fontSize: '0.875rem' }}
+                    className="hover:text-white transition-colors flex items-center gap-2">
+                    <span style={{ color: '#3b82f6' }}>›</span> {v}
                   </Link>
                 </li>
               ))}
@@ -84,43 +65,32 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-white font-bold text-base mb-5">Contact Us</h3>
-            <div className="space-y-4 text-sm">
-              <div className="flex items-start gap-3">
-                <span className="text-blue-500 text-lg mt-0.5">📞</span>
-                <div>
-                  <p className="text-white font-semibold text-sm">Phone / WhatsApp</p>
-                  <p className="text-gray-500 mt-0.5">+91 98765 43210</p>
-                  <p className="text-gray-500">+91 98765 43211</p>
+            <h4 className="font-bold text-white text-sm mb-4">Contact Us</h4>
+            <div className="space-y-4">
+              {[
+                { icon: '📞', title: 'Phone / WhatsApp', lines: ['+91 98765 43210', '+91 98765 43211'] },
+                { icon: '✉️', title: 'Email', lines: ['info@travelgo.in', 'support@travelgo.in'] },
+                { icon: '🕐', title: 'Support', lines: ['24 × 7, All Days'] },
+              ].map(c => (
+                <div key={c.title} className="flex items-start gap-3">
+                  <span className="text-lg">{c.icon}</span>
+                  <div>
+                    <p className="text-white font-semibold text-xs">{c.title}</p>
+                    {c.lines.map(l => <p key={l} style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{l}</p>)}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-blue-500 text-lg mt-0.5">✉️</span>
-                <div>
-                  <p className="text-white font-semibold text-sm">Email</p>
-                  <p className="text-gray-500 mt-0.5">info@travelgo.in</p>
-                  <p className="text-gray-500">support@travelgo.in</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-blue-500 text-lg mt-0.5">🕐</span>
-                <div>
-                  <p className="text-white font-semibold text-sm">Support Hours</p>
-                  <p className="text-gray-500 mt-0.5">24 × 7, All Days</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+      <div style={{ borderTop: '1px solid #1e293b' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3"
+          style={{ color: '#64748b', fontSize: '0.8rem' }}>
           <p>© {year} TravelGo. All rights reserved. Made with ❤️ in India</p>
-          <div className="flex gap-6">
-            {['Privacy Policy', 'Terms of Service', 'Cancellation Policy'].map(item => (
-              <a key={item} href="#" className="hover:text-gray-400 transition-colors">{item}</a>
+          <div className="flex gap-5">
+            {['Privacy Policy', 'Terms', 'Cancellation'].map(t => (
+              <a key={t} href="#" className="hover:text-gray-400 transition-colors">{t}</a>
             ))}
           </div>
         </div>

@@ -1,129 +1,73 @@
-// Home.tsx — TravelGo Homepage — Professional redesign
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import SearchForm from '../components/SearchForm';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import SearchForm from '../components/SearchForm';
+import Loading from '../components/Loading';
+import { vehicleAPI, packageAPI } from '../services/api';
 import type { Vehicle, TourPackage } from '../types';
 
-// ─────────────────────────────────────────────
-// Real Unsplash vehicle images (free, no auth needed)
-// ─────────────────────────────────────────────
-const DEMO_VEHICLES: Vehicle[] = [
-  {
-    id: 1, name: '9 Seater Traveller', vehicle_type: 'Traveller',
-    registration_number: 'DL01AB1234', seating_capacity: 9,
-    price_per_km: 18, driver_charge: 2000, ac: true,
-    pushback_seats: false, music_system: true, luggage_capacity: 'Medium',
-    description: 'Perfect for small family trips and group outings.',
-    image_url: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
-  {
-    id: 2, name: '12 Seater Traveller', vehicle_type: 'Traveller',
-    registration_number: 'DL02CD5678', seating_capacity: 12,
-    price_per_km: 22, driver_charge: 2200, ac: true,
-    pushback_seats: true, music_system: true, luggage_capacity: 'Large',
-    description: 'Comfortable traveller with pushback seats for long journeys.',
-    image_url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
-  {
-    id: 3, name: '16 Seater Traveller', vehicle_type: 'Traveller',
-    registration_number: 'DL03EF9012', seating_capacity: 16,
-    price_per_km: 26, driver_charge: 2500, ac: true,
-    pushback_seats: true, music_system: true, luggage_capacity: 'Large',
-    description: 'Ideal for medium-sized groups and corporate events.',
-    image_url: 'https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
-  {
-    id: 4, name: 'Toyota Innova Crysta', vehicle_type: 'SUV',
-    registration_number: 'DL04GH3456', seating_capacity: 7,
-    price_per_km: 16, driver_charge: 1800, ac: true,
-    pushback_seats: false, music_system: true, luggage_capacity: 'Medium',
-    description: 'Premium SUV — perfect for family and business travel.',
-    image_url: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
-  {
-    id: 5, name: 'Luxury Tempo Traveller', vehicle_type: 'Tempo',
-    registration_number: 'DL05IJ7890', seating_capacity: 14,
-    price_per_km: 28, driver_charge: 2600, ac: true,
-    pushback_seats: true, music_system: true, luggage_capacity: 'Extra Large',
-    description: 'Premium tempo with reclining seats, LED lights & charging ports.',
-    image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
-  {
-    id: 6, name: 'Sedan (Swift Dzire)', vehicle_type: 'Sedan',
-    registration_number: 'DL06KL1234', seating_capacity: 4,
-    price_per_km: 12, driver_charge: 1500, ac: true,
-    pushback_seats: false, music_system: true, luggage_capacity: 'Small',
-    description: 'Comfortable sedan for solo or couple travel.',
-    image_url: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80',
-    status: 'AVAILABLE', created_at: '',
-  },
+// Real vehicle photos from Unsplash (free, no key needed)
+const VEHICLE_IMGS: Record<string, string> = {
+  Traveller: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=75',
+  Bus:       'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=75',
+  SUV:       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=75',
+  Sedan:     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=75',
+  Tempo:     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=75',
+};
+
+const DEST_IMGS: Record<string, string> = {
+  Manali:    'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=500&q=75',
+  Shimla:    'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=500&q=75',
+  Rishikesh: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=500&q=75',
+  Jaipur:    'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=500&q=75',
+  Agra:      'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=500&q=75',
+  Kashmir:   'https://images.unsplash.com/photo-1579531403068-8d9f8ffcc0c3?w=500&q=75',
+  Mussoorie: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=75',
+  Varanasi:  'https://images.unsplash.com/photo-1561361058-c24e022a5f6d?w=500&q=75',
+};
+
+const PKG_IMGS: Record<string, string> = {
+  Manali:    'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=500&q=75',
+  Shimla:    'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=500&q=75',
+  Rishikesh: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=500&q=75',
+  Jaipur:    'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=500&q=75',
+};
+
+function getVehicleImg(v: Vehicle) {
+  if (v.image_url && !v.image_url.includes('placehold.co')) return v.image_url;
+  return VEHICLE_IMGS[v.vehicle_type] || VEHICLE_IMGS.Traveller;
+}
+
+function getPkgImg(p: TourPackage) {
+  if (p.image_url && !p.image_url.includes('placehold.co')) return p.image_url;
+  return PKG_IMGS[p.destination_name || ''] || VEHICLE_IMGS.Traveller;
+}
+
+// ─── FAQ ───────────────────────────────────────────
+const FAQ = [
+  { q: 'How do I book a vehicle?', a: 'Use the search form, browse vehicles, click Book Now, fill your details and confirm. Receive a booking reference instantly.' },
+  { q: 'Is the driver included?', a: 'Yes. All bookings include an experienced, verified driver. Driver charges are shown transparently in the fare breakdown.' },
+  { q: 'Are there any hidden charges?', a: 'No. You see the full breakdown — base fare, driver charge, toll estimate and parking — before confirming.' },
+  { q: 'Can I cancel my booking?', a: 'Yes. Free cancellation up to 24 hours before travel. Cancellations within 24 hours may have a small fee.' },
+  { q: 'Can I book for multiple days?', a: 'Yes. Select Round Trip or Multi Day, set your return date, and the fare is calculated automatically.' },
 ];
 
-const DEMO_PACKAGES: TourPackage[] = [
-  {
-    id: 1, destination_id: 1, destination_name: 'Himachal Pradesh',
-    name: 'Manali Adventure Tour', duration_days: 5, duration_nights: 4,
-    starting_price: 12000,
-    description: 'Snow-capped mountains, Rohtang Pass and Solang Valley.',
-    image_url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80',
-    status: 'ACTIVE', highlights: ['Rohtang Pass', 'Solang Valley', 'Hadimba Temple'],
-  },
-  {
-    id: 2, destination_id: 2, destination_name: 'Himachal Pradesh',
-    name: 'Shimla Heritage Tour', duration_days: 4, duration_nights: 3,
-    starting_price: 9500,
-    description: 'Colonial charm, Mall Road and panoramic mountain views.',
-    image_url: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=600&q=80',
-    status: 'ACTIVE', highlights: ['Mall Road', 'Christ Church', 'Jakhu Temple'],
-  },
-  {
-    id: 3, destination_id: 3, destination_name: 'Uttarakhand',
-    name: 'Rishikesh Spiritual Tour', duration_days: 3, duration_nights: 2,
-    starting_price: 6500,
-    description: 'Yoga capital of the world — Ganga aarti and river rafting.',
-    image_url: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=600&q=80',
-    status: 'ACTIVE', highlights: ['River Rafting', 'Ganga Aarti', 'Laxman Jhula'],
-  },
-  {
-    id: 4, destination_id: 4, destination_name: 'Rajasthan',
-    name: 'Jaipur Royal Tour', duration_days: 3, duration_nights: 2,
-    starting_price: 7500,
-    description: 'The Pink City — palaces, forts and Rajasthani culture.',
-    image_url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&q=80',
-    status: 'ACTIVE', highlights: ['Amber Fort', 'Hawa Mahal', 'City Palace'],
-  },
-];
-
-const FAQ_ITEMS = [
-  { q: 'How can I book a vehicle?', a: 'Use the search form to enter your trip details, browse available vehicles, click "Book Now", fill in your details and confirm. You\'ll receive a confirmation with your booking reference.' },
-  { q: 'Is a driver included in the booking?', a: 'Yes! All our vehicles come with experienced, verified drivers. A driver charge is included in your fare. No need to arrange a driver separately.' },
-  { q: 'What payment methods are accepted?', a: 'We accept UPI, net banking, credit/debit cards and cash. Online payment options are available during checkout.' },
-  { q: 'Can I cancel my booking?', a: 'Yes. Cancellations made 24 hours before the trip are eligible for a full refund. Cancellations within 24 hours may attract a small cancellation fee.' },
-  { q: 'Are toll charges and parking included?', a: 'Toll and parking charges are estimated based on the route and added to your fare. Any difference in actual tolls will be settled directly with the driver.' },
-  { q: 'Can I book for multiple days?', a: 'Absolutely. Select "Multi Day" or "Round Trip" as trip type, enter your travel and return dates and our system calculates the fare accordingly.' },
-];
-
-function FaqItem({ q, a }: { q: string; a: string }) {
+function FAQ_Item({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full text-left px-6 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors"
-      >
-        <span className="font-semibold text-gray-900 text-base pr-4">{q}</span>
-        <span className={`flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg transition-transform duration-300 ${open ? 'rotate-45' : ''}`}>+</span>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+      <button onClick={() => setOpen(!open)}
+        style={{ width: '100%', textAlign: 'left', padding: '1.1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', cursor: 'pointer', border: 'none' }}>
+        <span style={{ fontWeight: 600, color: '#111827', fontSize: '0.95rem' }}>{q}</span>
+        <span style={{
+          width: 28, height: 28, borderRadius: '50%', background: '#eff6ff', color: '#2563eb',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem',
+          flexShrink: 0, transition: 'transform .3s', transform: open ? 'rotate(45deg)' : 'none'
+        }}>+</span>
       </button>
       {open && (
-        <div className="px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 bg-blue-50/30 pt-4">
+        <div style={{ padding: '0 1.5rem 1.1rem', color: '#4b5563', fontSize: '0.9rem', lineHeight: 1.7, borderTop: '1px solid #f3f4f6', paddingTop: '1rem', background: '#f9fafb' }}>
           {a}
         </div>
       )}
@@ -131,377 +75,314 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-// ── Vehicle Card (inline for homepage) ──
-function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group card-hover">
-      <div className="relative overflow-hidden h-52">
-        <img
-          src={vehicle.image_url}
-          alt={vehicle.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80'; }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        {vehicle.ac && (
-          <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">❄️ AC</span>
-        )}
-        <span className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Available</span>
-        <div className="absolute bottom-3 left-3 text-white">
-          <p className="font-bold text-lg leading-tight drop-shadow">{vehicle.name}</p>
-          <p className="text-white/80 text-xs">👥 {vehicle.seating_capacity} Seats</p>
-        </div>
-      </div>
-      <div className="p-5">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {vehicle.ac && <span className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold">AC</span>}
-          {vehicle.pushback_seats && <span className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded-full font-semibold">Pushback</span>}
-          {vehicle.music_system && <span className="bg-pink-50 text-pink-700 text-xs px-2.5 py-1 rounded-full font-semibold">🎵 Music</span>}
-          <span className="bg-orange-50 text-orange-700 text-xs px-2.5 py-1 rounded-full font-semibold">🧳 {vehicle.luggage_capacity}</span>
-        </div>
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div>
-            <span className="text-2xl font-extrabold text-blue-600">₹{vehicle.price_per_km}</span>
-            <span className="text-gray-400 text-xs ml-1">/km</span>
-          </div>
-          <div className="flex gap-2">
-            <Link to={`/vehicles/${vehicle.id}`} className="text-xs font-semibold text-blue-600 border border-blue-200 px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors">Details</Link>
-            <Link to={`/booking?vehicle=${vehicle.id}`} className="text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-xl hover:bg-orange-600 transition-colors shadow-sm">Book Now</Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Package Card (inline for homepage) ──
-function PackageCard({ pkg }: { pkg: TourPackage }) {
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group card-hover">
-      <div className="relative overflow-hidden h-56">
-        <img
-          src={pkg.image_url}
-          alt={pkg.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=600&q=80'; }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <p className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-1">📍 {pkg.destination_name}</p>
-          <h3 className="font-bold text-lg leading-tight">{pkg.name}</h3>
-          <span className="inline-block mt-1 bg-white/20 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">{pkg.duration_days}D / {pkg.duration_nights}N</span>
-        </div>
-      </div>
-      <div className="p-5">
-        <p className="text-gray-500 text-sm mb-4 line-clamp-2">{pkg.description}</p>
-        {pkg.highlights && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {pkg.highlights.slice(0, 3).map((h, i) => (
-              <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full font-medium">✓ {h}</span>
-            ))}
-          </div>
-        )}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Starting from</p>
-            <span className="text-xl font-extrabold text-blue-600">₹{pkg.starting_price.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex gap-2">
-            <Link to={`/packages/${pkg.id}`} className="text-xs font-semibold text-blue-600 border border-blue-200 px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors">View</Link>
-            <Link to={`/booking?package=${pkg.id}`} className="text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-xl hover:bg-orange-600 transition-colors shadow-sm">Book</Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [packages, setPackages] = useState<TourPackage[]>([]);
+  const [loadingV, setLoadingV] = useState(true);
+  const [loadingP, setLoadingP] = useState(true);
+
+  useEffect(() => {
+    vehicleAPI.getAll({ status: 'AVAILABLE' })
+      .then(r => setVehicles((r.data.data || []).slice(0, 6)))
+      .catch(() => {})
+      .finally(() => setLoadingV(false));
+    packageAPI.getAll()
+      .then(r => setPackages((r.data.data || []).slice(0, 4)))
+      .catch(() => {})
+      .finally(() => setLoadingP(false));
+  }, []);
+
   return (
-    <>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       <Navbar />
 
-      {/* ══════════════════════════════════════
-          HERO
-      ══════════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900">
-        {/* Background image overlay */}
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=80"
-            alt="Travel background"
-            className="w-full h-full object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-950/80 via-blue-900/60 to-indigo-900/80" />
+      {/* ═══ HERO ═══ */}
+      <section style={{
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 40%, #312e81 100%)',
+        position: 'relative', overflow: 'hidden', paddingTop: '5rem', paddingBottom: '4rem'
+      }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=60"
+            alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15 }} />
         </div>
+        {/* soft glow circles */}
+        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: 400, height: 400, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-60px', left: '-60px', width: 300, height: 300, borderRadius: '50%', background: 'rgba(59,130,246,0.15)', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
-        {/* Decorative blurs */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-sm font-medium px-5 py-2 rounded-full mb-7 shadow-lg">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              India's Trusted Travel Vehicle Platform
-            </div>
-
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white mb-6 leading-[1.05]" style={{fontFamily:'Poppins,sans-serif'}}>
-              Travel Together.{' '}
-              <span className="gradient-text">Travel Better.</span>
-            </h1>
-
-            <p className="text-lg sm:text-xl text-blue-100/80 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Book verified vehicles for family trips, corporate travel, weddings and group tours.
-              Transparent pricing. Experienced drivers. 24/7 support.
-            </p>
-
-            {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8 mb-12">
-              {[
-                { value: '5,000+', label: 'Happy Customers' },
-                { value: '150+',   label: 'Verified Vehicles' },
-                { value: '50+',    label: 'Destinations' },
-                { value: '4.8★',   label: 'Average Rating' },
-              ].map(s => (
-                <div key={s.label} className="text-center">
-                  <p className="text-3xl font-extrabold text-yellow-400" style={{fontFamily:'Poppins,sans-serif'}}>{s.value}</p>
-                  <p className="text-blue-300 text-xs mt-0.5 font-medium">{s.label}</p>
-                </div>
-              ))}
-            </div>
+        <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem', textAlign: 'center' }}>
+          {/* badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 999, padding: '6px 18px', marginBottom: 24 }}>
+            <span style={{ width: 8, height: 8, background: '#4ade80', borderRadius: '50%', display: 'inline-block' }} />
+            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem', fontWeight: 600 }}>India's Trusted Travel Vehicle Platform</span>
           </div>
 
-          {/* Search Form */}
-          <div className="max-w-4xl mx-auto">
+          <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(2.2rem, 5vw, 4rem)', fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: '1.25rem' }}>
+            Travel Together.{' '}
+            <span style={{ background: 'linear-gradient(90deg,#fbbf24,#f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Travel Better.
+            </span>
+          </h1>
+
+          <p style={{ color: 'rgba(219,234,254,0.85)', fontSize: '1.1rem', maxWidth: 600, margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+            Book verified vehicles for family trips, corporate travel, weddings and group tours.
+            Transparent pricing. Experienced drivers. 24/7 support.
+          </p>
+
+          {/* Stats row */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2.5rem', marginBottom: '3rem' }}>
+            {[['5,000+','Happy Customers'],['150+','Verified Vehicles'],['50+','Destinations'],['4.8★','Avg Rating']].map(([v, l]) => (
+              <div key={l} style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fbbf24', fontFamily: 'Poppins,sans-serif' }}>{v}</p>
+                <p style={{ color: 'rgba(191,219,254,0.8)', fontSize: '0.78rem', fontWeight: 500, marginTop: 2 }}>{l}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Search box */}
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
             <SearchForm />
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          TRUST STRIP
-      ══════════════════════════════════════ */}
-      <section className="bg-white border-b border-gray-100 py-5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
-            {[
-              { icon: '🛡️', text: 'Verified & Insured Vehicles' },
-              { icon: '👨‍✈️', text: 'Background-Checked Drivers' },
-              { icon: '💰', text: 'No Hidden Charges' },
-              { icon: '🕐', text: '24/7 Customer Support' },
-              { icon: '✅', text: 'Free Cancellation (24hrs)' },
-            ].map(item => (
-              <div key={item.text} className="flex items-center gap-2 text-gray-600 text-sm font-medium">
-                <span className="text-xl">{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
+      {/* ═══ TRUST STRIP ═══ */}
+      <section style={{ background: '#fff', borderBottom: '1px solid #f3f4f6', padding: '1rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem 3rem' }}>
+          {[['🛡️','Verified & Insured'],['👨‍✈️','Background-Checked Drivers'],['💰','Zero Hidden Charges'],['🕐','24/7 Support'],['✅','Free Cancellation']].map(([ic, tx]) => (
+            <div key={tx} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#374151', fontSize: '0.875rem', fontWeight: 500 }}>
+              <span style={{ fontSize: '1.1rem' }}>{ic}</span> {tx}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          POPULAR VEHICLES
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="section-label">Our Fleet</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">Popular Vehicles</h2>
-            <p className="text-gray-500 mt-3 text-lg max-w-xl mx-auto">
-              Choose from our wide range of well-maintained, air-conditioned vehicles for every group size.
+      {/* ═══ VEHICLES ═══ */}
+      <section style={{ background: '#f8fafc', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <span className="label">Our Fleet</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>
+              Popular Vehicles
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: 10, fontSize: '1rem', maxWidth: 500, margin: '10px auto 0' }}>
+              Well-maintained, air-conditioned vehicles for every group size and budget.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-            {DEMO_VEHICLES.map(v => <VehicleCard key={v.id} vehicle={v} />)}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link to="/vehicles" className="btn btn-primary text-base px-10 py-4 rounded-2xl shadow-xl">
+          {loadingV ? <Loading message="Loading vehicles..." /> : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '1.5rem' }}>
+              {vehicles.map(v => (
+                <div key={v.id} className="card" style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                  <div style={{ position: 'relative', height: 200, overflow: 'hidden' }}>
+                    <img src={getVehicleImg(v)} alt={v.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = VEHICLE_IMGS.Traveller; }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 60%)' }} />
+                    {v.ac && <span style={{ position: 'absolute', top: 12, left: 12, background: '#2563eb', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>❄️ AC</span>}
+                    <span style={{ position: 'absolute', top: 12, right: 12, background: '#16a34a', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>✓ Available</span>
+                    <div style={{ position: 'absolute', bottom: 12, left: 14 }}>
+                      <p style={{ color: '#fff', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'Poppins,sans-serif' }}>{v.name}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.78rem' }}>👥 {v.seating_capacity} Seats</p>
+                    </div>
+                  </div>
+                  <div style={{ padding: '1rem 1.1rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                      {v.ac && <span style={{ background: '#eff6ff', color: '#2563eb', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>AC</span>}
+                      {v.pushback_seats && <span style={{ background: '#f5f3ff', color: '#7c3aed', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>Pushback</span>}
+                      {v.music_system && <span style={{ background: '#fdf4ff', color: '#a21caf', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>🎵 Music</span>}
+                      {v.luggage_capacity && <span style={{ background: '#fff7ed', color: '#c2410c', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>🧳 {v.luggage_capacity}</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #f3f4f6' }}>
+                      <div>
+                        <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2563eb', fontFamily: 'Poppins,sans-serif' }}>₹{v.price_per_km}</span>
+                        <span style={{ color: '#9ca3af', fontSize: '0.78rem' }}>/km</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Link to={`/vehicles/${v.id}`}
+                          style={{ fontSize: '0.8rem', fontWeight: 600, color: '#2563eb', border: '1px solid #bfdbfe', padding: '6px 12px', borderRadius: 10, background: '#fff' }}>
+                          Details
+                        </Link>
+                        <Link to={`/booking?vehicle=${v.id}`}
+                          style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', background: '#f97316', padding: '6px 14px', borderRadius: 10 }}>
+                          Book
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+            <Link to="/vehicles"
+              style={{ display: 'inline-block', background: '#2563eb', color: '#fff', fontWeight: 700, padding: '0.9rem 2.5rem', borderRadius: 14, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(37,99,235,0.3)' }}>
               View All Vehicles →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          TOUR PACKAGES
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="section-label">Curated Packages</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">Popular Tour Packages</h2>
-            <p className="text-gray-500 mt-3 text-lg max-w-xl mx-auto">
-              Handpicked itineraries for the most loved destinations across India.
+      {/* ═══ TOUR PACKAGES ═══ */}
+      <section style={{ background: '#fff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <span className="label">Curated Trips</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>
+              Popular Tour Packages
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: 10, maxWidth: 500, margin: '10px auto 0' }}>
+              Handpicked itineraries for India's most loved destinations.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {DEMO_PACKAGES.map(pkg => <PackageCard key={pkg.id} pkg={pkg} />)}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link to="/packages" className="btn btn-primary text-base px-10 py-4 rounded-2xl shadow-xl">
+          {loadingP ? <Loading message="Loading packages..." /> : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
+              {packages.map(p => (
+                <div key={p.id} className="card" style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                  <div style={{ position: 'relative', height: 210, overflow: 'hidden' }}>
+                    <img src={getPkgImg(p)} alt={p.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = VEHICLE_IMGS.Traveller; }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.05) 60%)' }} />
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem' }}>
+                      <p style={{ color: '#fbbf24', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>📍 {p.destination_name}</p>
+                      <h3 style={{ color: '#fff', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'Poppins,sans-serif', marginTop: 3 }}>{p.name}</h3>
+                      <span style={{ display: 'inline-block', marginTop: 5, background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.72rem', padding: '3px 10px', borderRadius: 999 }}>
+                        {p.duration_days}D / {p.duration_nights}N
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ padding: '1rem 1.1rem' }}>
+                    <p className="line-clamp-2" style={{ color: '#6b7280', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: 10 }}>{p.description}</p>
+                    {p.highlights && p.highlights.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
+                        {p.highlights.slice(0, 3).map(h => (
+                          <span key={h} style={{ background: '#f0fdf4', color: '#16a34a', fontSize: '0.7rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>✓ {h}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #f3f4f6' }}>
+                      <div>
+                        <p style={{ color: '#9ca3af', fontSize: '0.72rem' }}>Starting from</p>
+                        <span style={{ fontSize: '1.35rem', fontWeight: 800, color: '#2563eb', fontFamily: 'Poppins,sans-serif' }}>₹{p.starting_price.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Link to={`/packages/${p.id}`}
+                          style={{ fontSize: '0.8rem', fontWeight: 600, color: '#2563eb', border: '1px solid #bfdbfe', padding: '6px 12px', borderRadius: 10, background: '#fff' }}>View</Link>
+                        <Link to={`/booking?package=${p.id}`}
+                          style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', background: '#f97316', padding: '6px 14px', borderRadius: 10 }}>Book</Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+            <Link to="/packages"
+              style={{ display: 'inline-block', background: '#2563eb', color: '#fff', fontWeight: 700, padding: '0.9rem 2.5rem', borderRadius: 14, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(37,99,235,0.3)' }}>
               View All Packages →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          WHY CHOOSE US
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="inline-block bg-white/20 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">Why TravelGo</span>
-            <h2 className="text-4xl font-extrabold">The Smarter Way to Travel</h2>
-            <p className="text-blue-200 mt-3 text-lg max-w-xl mx-auto">
-              We go beyond just providing a vehicle — we deliver a complete travel experience.
-            </p>
+      {/* ═══ WHY US ═══ */}
+      <section style={{ background: '#eff6ff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <span className="label">Why TravelGo</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>
+              The Smarter Way to Travel
+            </h2>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.5rem' }}>
             {[
-              { icon: '🚌', title: 'Verified Vehicles', desc: 'Every vehicle is inspected, insured and maintained to the highest standard before every trip.' },
-              { icon: '👨‍✈️', title: 'Expert Drivers', desc: 'All drivers are background-verified with years of experience on intercity and mountain routes.' },
-              { icon: '💰', title: 'Zero Hidden Costs', desc: 'See the complete fare breakdown — base, driver, tolls — before confirming. No surprises.' },
-              { icon: '🕐', title: '24/7 Support', desc: 'Our customer support team is available round the clock via phone and WhatsApp.' },
+              { icon: '🚌', title: 'Verified Vehicles', desc: 'Every vehicle is inspected, insured and maintained before every trip.' },
+              { icon: '👨‍✈️', title: 'Expert Drivers', desc: 'Background-verified drivers with years of intercity and mountain route experience.' },
+              { icon: '💰', title: 'Zero Hidden Costs', desc: 'Complete fare breakdown — base, driver, tolls — before you confirm.' },
+              { icon: '🕐', title: '24/7 Support', desc: 'Round-the-clock support via phone and WhatsApp for every journey.' },
             ].map(item => (
-              <div key={item.title} className="bg-white/10 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:bg-white/20 transition-all duration-300">
-                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-5">{item.icon}</div>
-                <h3 className="font-bold text-xl mb-3">{item.title}</h3>
-                <p className="text-blue-100/80 text-sm leading-relaxed">{item.desc}</p>
+              <div key={item.title} style={{ background: '#fff', borderRadius: 20, padding: '1.75rem', border: '1px solid #dbeafe' }}>
+                <div style={{ width: 52, height: 52, background: '#eff6ff', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', marginBottom: 16 }}>
+                  {item.icon}
+                </div>
+                <h3 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#111827', marginBottom: 8 }}>{item.title}</h3>
+                <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: 1.7 }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          HOW IT WORKS
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="section-label">Simple & Fast</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">Book in 5 Easy Steps</h2>
-          </div>
-
-          <div className="relative">
-            {/* Connector line (desktop) */}
-            <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-blue-100 mx-16" />
-
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-              {[
-                { step: '1', icon: '🔍', title: 'Search',    desc: 'Enter your trip details' },
-                { step: '2', icon: '🚌', title: 'Select',    desc: 'Compare and choose vehicle' },
-                { step: '3', icon: '📝', title: 'Fill Info', desc: 'Enter passenger details' },
-                { step: '4', icon: '✅', title: 'Confirm',   desc: 'Review price and pay' },
-                { step: '5', icon: '🎉', title: 'Enjoy',     desc: 'Sit back and travel' },
-              ].map(item => (
-                <div key={item.step} className="relative flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl mb-3 shadow-lg shadow-blue-200 relative z-10">
-                    {item.icon}
-                  </div>
-                  <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-sm font-extrabold mb-3 border-2 border-blue-100">
-                    {item.step}
-                  </div>
-                  <h4 className="font-bold text-gray-900 text-base">{item.title}</h4>
-                  <p className="text-gray-400 text-xs mt-1">{item.desc}</p>
-                </div>
-              ))}
-            </div>
+      {/* ═══ HOW IT WORKS ═══ */}
+      <section style={{ background: '#fff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 1.5rem', textAlign: 'center' }}>
+          <span className="label">Simple & Fast</span>
+          <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827', marginBottom: '3rem' }}>Book in 5 Easy Steps</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1.5rem' }}>
+            {[['🔍','1','Search','Enter trip details'],['🚌','2','Select','Choose vehicle'],['📝','3','Fill Info','Passenger details'],['✅','4','Confirm','Review & pay'],['🎉','5','Enjoy','Sit back & travel']].map(([ic, st, ti, de]) => (
+              <div key={st} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 60, height: 60, background: '#eff6ff', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.7rem', border: '2px solid #dbeafe' }}>{ic}</div>
+                <div style={{ width: 28, height: 28, background: '#2563eb', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>{st}</div>
+                <p style={{ fontWeight: 700, color: '#111827', fontSize: '0.9rem' }}>{ti}</p>
+                <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>{de}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          DESTINATIONS
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="section-label">Top Picks</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">Popular Destinations</h2>
+      {/* ═══ DESTINATIONS ═══ */}
+      <section style={{ background: '#f8fafc', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span className="label">Top Picks</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>Popular Destinations</h2>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              { name: 'Manali',    state: 'Himachal Pradesh', emoji: '🏔️', color: 'from-blue-600 to-indigo-700',    img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400&q=80' },
-              { name: 'Shimla',    state: 'Himachal Pradesh', emoji: '🌲', color: 'from-green-600 to-teal-700',     img: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=400&q=80' },
-              { name: 'Rishikesh', state: 'Uttarakhand',      emoji: '🕉️', color: 'from-orange-500 to-amber-600', img: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=400&q=80' },
-              { name: 'Jaipur',    state: 'Rajasthan',        emoji: '🏯', color: 'from-pink-600 to-rose-700',     img: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=80' },
-              { name: 'Agra',      state: 'Uttar Pradesh',    emoji: '🕌', color: 'from-purple-600 to-violet-700', img: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&q=80' },
-              { name: 'Kashmir',   state: 'J&K',              emoji: '❄️', color: 'from-cyan-600 to-blue-700',     img: 'https://images.unsplash.com/photo-1579531403068-8d9f8ffcc0c3?w=400&q=80' },
-              { name: 'Mussoorie', state: 'Uttarakhand',      emoji: '🌫️', color: 'from-slate-600 to-gray-700',   img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80' },
-              { name: 'Varanasi',  state: 'Uttar Pradesh',    emoji: '🛕', color: 'from-yellow-500 to-orange-600', img: 'https://images.unsplash.com/photo-1561361058-c24e022a5f6d?w=400&q=80' },
-            ].map((dest) => (
-              <Link
-                key={dest.name}
-                to="/destinations"
-                className="relative overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group block aspect-square sm:aspect-auto sm:h-44"
-              >
-                <img
-                  src={dest.img}
-                  alt={dest.name}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=400&q=80'; }}
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t ${dest.color} opacity-70 group-hover:opacity-60 transition-opacity`} />
-                <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
-                  <span className="text-2xl mb-1">{dest.emoji}</span>
-                  <h3 className="font-bold text-lg leading-tight">{dest.name}</h3>
-                  <p className="text-white/80 text-xs">{dest.state}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {Object.entries(DEST_IMGS).map(([name, img]) => (
+              <Link key={name} to="/destinations" className="card"
+                style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', display: 'block', height: 180 }}>
+                <img src={img} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = VEHICLE_IMGS.Traveller; }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,0.55),rgba(0,0,0,0.05))' }} />
+                <div style={{ position: 'absolute', bottom: 14, left: 14, color: '#fff' }}>
+                  <p style={{ fontWeight: 700, fontSize: '1.05rem', fontFamily: 'Poppins,sans-serif' }}>{name}</p>
                 </div>
               </Link>
             ))}
           </div>
-
-          <div className="text-center mt-10">
-            <Link to="/destinations" className="btn btn-primary px-8 py-3.5 rounded-2xl">
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link to="/destinations"
+              style={{ display: 'inline-block', background: '#2563eb', color: '#fff', fontWeight: 700, padding: '0.85rem 2.2rem', borderRadius: 14, fontSize: '0.95rem' }}>
               Explore All Destinations →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          TESTIMONIALS
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="section-label">Customer Stories</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">What Our Customers Say</h2>
+      {/* ═══ TESTIMONIALS ═══ */}
+      <section style={{ background: '#fff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span className="label">Customer Stories</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>What Our Customers Say</h2>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {[
-              { name: 'Rahul Sharma', trip: 'Delhi → Manali', rating: 5, avatar: 'RS', color: 'bg-blue-600',
-                review: 'Excellent service! The 12 seater traveller was spotless and the driver was very professional. Our Manali trip was absolutely amazing. Highly recommend TravelGo!' },
-              { name: 'Priya Patel', trip: 'Jaipur → Agra', rating: 5, avatar: 'PP', color: 'bg-pink-600',
-                review: 'Booked an Innova Crysta for a family trip. Very smooth booking process. The vehicle was well-maintained and driver knew all the routes perfectly.' },
-              { name: 'Amit Singh', trip: 'Delhi → Rishikesh', rating: 5, avatar: 'AS', color: 'bg-indigo-600',
-                review: 'Great experience overall. Pricing was completely transparent — no hidden charges at all. Will definitely use TravelGo again for our next group trip.' },
+              { name: 'Rahul Sharma', trip: 'Delhi → Manali', av: 'RS', c: '#2563eb', rating: 5, review: 'Excellent service! The 12 seater traveller was spotless and the driver was very professional. Our Manali trip was absolutely amazing!' },
+              { name: 'Priya Patel', trip: 'Jaipur → Agra', av: 'PP', c: '#db2777', rating: 5, review: 'Booked an Innova Crysta for a family trip. Very smooth booking process. Vehicle was well-maintained and driver knew all the routes perfectly.' },
+              { name: 'Amit Singh', trip: 'Delhi → Rishikesh', av: 'AS', c: '#7c3aed', rating: 5, review: 'Great experience. Pricing was completely transparent — no hidden charges. Will definitely use TravelGo again for our next group trip.' },
             ].map(t => (
-              <div key={t.name} className="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-5">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-xl">★</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 text-base leading-relaxed mb-6 italic">"{t.review}"</p>
-                <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 ${t.color} text-white rounded-full flex items-center justify-center font-bold text-sm`}>{t.avatar}</div>
+              <div key={t.name} style={{ background: '#fff', borderRadius: 20, padding: '1.75rem', border: '1px solid #f1f5f9', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                <div style={{ color: '#fbbf24', fontSize: '1.1rem', marginBottom: 14 }}>{'★'.repeat(t.rating)}</div>
+                <p style={{ color: '#374151', fontSize: '0.9rem', lineHeight: 1.75, marginBottom: '1.25rem', fontStyle: 'italic' }}>"{t.review}"</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.c, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>{t.av}</div>
                   <div>
-                    <p className="font-bold text-gray-900">{t.name}</p>
-                    <p className="text-gray-400 text-xs">📍 {t.trip}</p>
+                    <p style={{ fontWeight: 700, color: '#111827', fontSize: '0.9rem' }}>{t.name}</p>
+                    <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>📍 {t.trip}</p>
                   </div>
                 </div>
               </div>
@@ -510,43 +391,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          FAQ
-      ══════════════════════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="section-label">Got Questions?</span>
-            <h2 className="text-4xl font-extrabold text-gray-900">Frequently Asked Questions</h2>
+      {/* ═══ FAQ ═══ */}
+      <section style={{ background: '#f8fafc', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span className="label">Got Questions?</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>Frequently Asked Questions</h2>
           </div>
-          <div className="space-y-3">
-            {FAQ_ITEMS.map(item => <FaqItem key={item.q} q={item.q} a={item.a} />)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {FAQ.map(f => <FAQ_Item key={f.q} q={f.q} a={f.a} />)}
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          BOTTOM CTA
-      ══════════════════════════════════════ */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80"
-            alt="CTA background"
-            className="w-full h-full object-cover opacity-10"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-800" />
+      {/* ═══ BOTTOM CTA ═══ */}
+      <section style={{ background: 'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding: '5rem 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=50"
+            alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08 }} />
         </div>
-        <div className="relative max-w-3xl mx-auto px-4 text-center text-white">
-          <h2 className="text-4xl sm:text-5xl font-extrabold mb-5">Ready to Plan Your Trip?</h2>
-          <p className="text-blue-100 text-lg mb-10 max-w-lg mx-auto">
+        <div style={{ position: 'relative', maxWidth: 650, margin: '0 auto', padding: '0 1.5rem' }}>
+          <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.8rem,4vw,2.75rem)', fontWeight: 900, color: '#fff', marginBottom: 16 }}>
+            Ready to Plan Your Trip?
+          </h2>
+          <p style={{ color: 'rgba(219,234,254,0.85)', fontSize: '1.05rem', marginBottom: '2.5rem', lineHeight: 1.7 }}>
             Join thousands of happy travellers. Book your vehicle in minutes — no paperwork, no hassle.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/vehicles" className="btn btn-accent text-base px-10 py-4 rounded-2xl shadow-xl shadow-orange-500/30">
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/vehicles"
+              style={{ background: '#f97316', color: '#fff', fontWeight: 700, padding: '0.9rem 2.5rem', borderRadius: 14, fontSize: '1rem', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
               Browse Vehicles
             </Link>
-            <Link to="/contact" className="btn btn-outline text-white border-white text-base px-10 py-4 rounded-2xl hover:bg-white/10">
+            <Link to="/contact"
+              style={{ background: 'transparent', color: '#fff', fontWeight: 700, padding: '0.9rem 2.5rem', borderRadius: 14, fontSize: '1rem', border: '2px solid rgba(255,255,255,0.4)' }}>
               Contact Us
             </Link>
           </div>
@@ -554,6 +431,6 @@ export default function Home() {
       </section>
 
       <Footer />
-    </>
+    </div>
   );
 }
