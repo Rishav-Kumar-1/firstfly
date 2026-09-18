@@ -10,17 +10,32 @@ interface VehicleCardProps {
 }
 
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
-  // Real vehicle images based on type
-  const fallbackImages: Record<string, string> = {
-    'Traveller': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80',
-    'SUV':       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80',
-    'Sedan':     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80',
-    'Tempo':     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-    'Bus':       'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80',
+  // Vehicle images mapped to your real fleet
+  const VEHICLE_NAME_IMGS: Record<string, string> = {
+    'Force Traveller':      '/vehicles/force-traveller.jpg',
+    'Force Urbania':        '/vehicles/urbania.jpg',
+    'Toyota Innova Crysta': '/vehicles/innova-crysta.jpg',
+    'Toyota Etios':         '/vehicles/etios.jpg',
+    'Maruti Suzuki Ertiga': '/vehicles/ertiga.jpg',
+    'Maruti Suzuki Dzire':  '/vehicles/dzire.jpg',
   };
-  const imageSrc = vehicle.image_url?.startsWith('https://placehold.co')
-    ? (fallbackImages[vehicle.vehicle_type] || fallbackImages['Traveller'])
-    : (vehicle.image_url || fallbackImages['Traveller']);
+  const TYPE_FALLBACKS: Record<string, string> = {
+    Traveller: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=75',
+    Bus:       'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=75',
+    SUV:       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=75',
+    Sedan:     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=75',
+    Tempo:     'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=75',
+  };
+  const getImageSrc = () => {
+    if (vehicle.image_url && !vehicle.image_url.includes('placehold.co') && !vehicle.image_url.includes('unsplash')) {
+      return vehicle.image_url;
+    }
+    const nameKey = Object.keys(VEHICLE_NAME_IMGS).find(k =>
+      vehicle.name.toLowerCase().includes(k.toLowerCase())
+    );
+    return nameKey ? VEHICLE_NAME_IMGS[nameKey] : (TYPE_FALLBACKS[vehicle.vehicle_type] || TYPE_FALLBACKS.Traveller);
+  };
+  const imageSrc = getImageSrc();
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 group">

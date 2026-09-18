@@ -68,8 +68,8 @@ export default function Footer() {
             <h4 className="font-bold text-white text-sm mb-4">Contact Us</h4>
             <div className="space-y-4">
               {[
-                { icon: '📞', title: 'Phone / WhatsApp', lines: ['+91 98765 43210', '+91 98765 43211'] },
-                { icon: '✉️', title: 'Email', lines: ['info@travelgo.in', 'support@travelgo.in'] },
+                { icon: '📞', title: 'Phone / WhatsApp', lines: ['+91 98771 24650'] },
+                { icon: '✉️', title: 'Email', lines: ['hsingh67243@gmail.com'] },
                 { icon: '🕐', title: 'Support', lines: ['24 × 7, All Days'] },
               ].map(c => (
                 <div key={c.title} className="flex items-start gap-3">

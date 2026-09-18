@@ -5,13 +5,25 @@ import { vehicleAPI } from '../services/api';
 import type { Vehicle } from '../types';
 
 const IMGS: Record<string, string> = {
-  Traveller: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=75',
-  Bus:       'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=75',
-  SUV:       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=75',
-  Sedan:     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=75',
-  Tempo:     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=75',
+  // By name (your real fleet)
+  'Force Traveller':      '/vehicles/force-traveller-1.jpeg',
+  'Force Urbania':        '/vehicles/urbania-1.jpeg',
+  'Toyota Innova Crysta': '/vehicles/innova-1.jpeg',
+  'Toyota Etios':         '/vehicles/etios-1.jpeg',
+  'Maruti Suzuki Ertiga': '/vehicles/ertiga-1.jpeg',
+  'Maruti Suzuki Dzire':  '/vehicles/dzire-1.jpeg',
+  // By type fallbacks
+  Traveller: '/vehicles/force-traveller-1.jpeg',
+  Bus:       '/vehicles/urbania-1.jpeg',
+  SUV:       '/vehicles/innova-1.jpeg',
+  Sedan:     '/vehicles/dzire-1.jpeg',
+  Tempo:     '/vehicles/force-traveller-3.jpeg',
 };
-const getImg = (v: Vehicle) => (v.image_url && !v.image_url.includes('placehold.co')) ? v.image_url : (IMGS[v.vehicle_type] || IMGS.Traveller);
+const getImg = (v: Vehicle) => {
+  if (v.image_url && !v.image_url.includes('placehold.co') && !v.image_url.includes('unsplash')) return v.image_url;
+  const nameKey = Object.keys(IMGS).find(k => v.name.toLowerCase().includes(k.toLowerCase()));
+  return nameKey ? IMGS[nameKey] : (IMGS[v.vehicle_type] || IMGS.Traveller);
+};
 
 export default function Vehicles() {
   const [sp] = useSearchParams();

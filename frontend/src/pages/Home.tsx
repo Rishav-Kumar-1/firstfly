@@ -7,13 +7,21 @@ import Loading from '../components/Loading';
 import { vehicleAPI, packageAPI } from '../services/api';
 import type { Vehicle, TourPackage } from '../types';
 
-// Real vehicle photos from Unsplash (free, no key needed)
+// Vehicle images — YOUR real fleet photos from public/vehicles/
 const VEHICLE_IMGS: Record<string, string> = {
-  Traveller: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=75',
-  Bus:       'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=75',
-  SUV:       'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=75',
-  Sedan:     'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=75',
-  Tempo:     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=75',
+  // By name (specific matches)
+  'Force Traveller':      '/vehicles/force-traveller-1.jpeg',
+  'Force Urbania':        '/vehicles/urbania-1.jpeg',
+  'Toyota Innova Crysta': '/vehicles/innova-1.jpeg',
+  'Toyota Etios':         '/vehicles/etios-1.jpeg',
+  'Maruti Suzuki Ertiga': '/vehicles/ertiga-1.jpeg',
+  'Maruti Suzuki Dzire':  '/vehicles/dzire-1.jpeg',
+  // By type fallbacks
+  'Traveller':            '/vehicles/force-traveller-1.jpeg',
+  'Tempo':                '/vehicles/force-traveller-3.jpeg',
+  'SUV':                  '/vehicles/innova-1.jpeg',
+  'Sedan':                '/vehicles/dzire-1.jpeg',
+  'Bus':                  '/vehicles/urbania-1.jpeg',
 };
 
 const DEST_IMGS: Record<string, string> = {
@@ -35,8 +43,17 @@ const PKG_IMGS: Record<string, string> = {
 };
 
 function getVehicleImg(v: Vehicle) {
-  if (v.image_url && !v.image_url.includes('placehold.co')) return v.image_url;
-  return VEHICLE_IMGS[v.vehicle_type] || VEHICLE_IMGS.Traveller;
+  // 1. Use DB image if it's a real path (not placeholder)
+  if (v.image_url && !v.image_url.includes('placehold.co') && !v.image_url.includes('unsplash')) {
+    return v.image_url;
+  }
+  // 2. Match by vehicle name (most specific)
+  const nameKey = Object.keys(VEHICLE_IMGS).find(k =>
+    v.name.toLowerCase().includes(k.toLowerCase())
+  );
+  if (nameKey) return VEHICLE_IMGS[nameKey];
+  // 3. Match by vehicle type
+  return VEHICLE_IMGS[v.vehicle_type] || VEHICLE_IMGS['_traveller_fallback'];
 }
 
 function getPkgImg(p: TourPackage) {
@@ -102,8 +119,13 @@ export default function Home() {
         position: 'relative', overflow: 'hidden', paddingTop: '5rem', paddingBottom: '4rem'
       }}>
         <div style={{ position: 'absolute', inset: 0 }}>
-          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=60"
-            alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15 }} />
+          <img src="/hero/hero-bg.jpeg"
+            alt="Travel background"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.25 }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=60';
+            }}
+          />
         </div>
         {/* soft glow circles */}
         <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: 400, height: 400, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', filter: 'blur(60px)', pointerEvents: 'none' }} />
@@ -362,6 +384,99 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ VIDEO SECTION ═══ */}
+      <section style={{ background: '#0f172a', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ display: 'inline-block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 8 }}>See Us In Action</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#fff' }}>
+              Experience the TravelGo Journey
+            </h2>
+            <p style={{ color: '#94a3b8', marginTop: 10, maxWidth: 500, margin: '10px auto 0' }}>
+              Watch how we make every trip comfortable, safe and memorable.
+            </p>
+          </div>
+
+          <div style={{ maxWidth: 900, margin: '0 auto', borderRadius: 20, overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }}>
+            <video
+              controls
+              preload="metadata"
+              poster="/hero/hero-bg.jpeg"
+              style={{ width: '100%', display: 'block', background: '#000' }}
+            >
+              <source src="/promo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
+            {[
+              { icon: '🚌', text: 'Luxury Interiors' },
+              { icon: '👨‍✈️', text: 'Professional Drivers' },
+              { icon: '❄️', text: 'Full AC Comfort' },
+              { icon: '🎵', text: 'Entertainment System' },
+            ].map(item => (
+              <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#94a3b8', fontSize: '0.875rem', fontWeight: 500 }}>
+                <span style={{ fontSize: '1.2rem' }}>{item.icon}</span> {item.text}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ PHOTO GALLERY ═══ */}
+      <section style={{ background: '#f8fafc', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <span style={{ display: 'inline-block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 8 }}>Our Fleet Gallery</span>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>
+              Real Vehicles. Real Comfort.
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: 10, maxWidth: 500, margin: '10px auto 0' }}>
+              Every vehicle in our fleet is well-maintained, verified and ready for your journey.
+            </p>
+          </div>
+
+          {/* Gallery Grid — your actual photos */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+            {[
+              '/vehicles/force-traveller-1.jpeg',
+              '/vehicles/urbania-1.jpeg',
+              '/vehicles/innova-1.jpeg',
+              '/vehicles/etios-1.jpeg',
+              '/vehicles/ertiga-1.jpeg',
+              '/vehicles/dzire-1.jpeg',
+              '/vehicles/force-traveller-2.jpeg',
+              '/vehicles/urbania-2.jpeg',
+              '/vehicles/innova-2.jpeg',
+              '/vehicles/force-traveller-3.jpeg',
+              '/vehicles/img-40.jpeg',
+              '/vehicles/img-41.jpeg',
+            ].map((src, i) => (
+              <div key={i} style={{ borderRadius: 14, overflow: 'hidden', aspectRatio: '4/3', position: 'relative' }}
+                className="card">
+                <img
+                  src={src}
+                  alt={`TravelGo Vehicle ${i + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.src = `https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&q=60`;
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link to="/vehicles"
+              style={{ display: 'inline-block', background: '#2563eb', color: '#fff', fontWeight: 700, padding: '0.875rem 2.5rem', borderRadius: 14, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(37,99,235,0.3)' }}>
+              View All Vehicles →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ TESTIMONIALS ═══ */}
       <section style={{ background: '#fff', padding: '5rem 0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
@@ -407,8 +522,10 @@ export default function Home() {
       {/* ═══ BOTTOM CTA ═══ */}
       <section style={{ background: 'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding: '5rem 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0 }}>
-          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=50"
-            alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08 }} />
+          <img src="/hero/hero-bg2.jpeg"
+            alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.1 }}
+            onError={(e) => { (e.target as HTMLImageElement).src = ''; (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
         </div>
         <div style={{ position: 'relative', maxWidth: 650, margin: '0 auto', padding: '0 1.5rem' }}>
           <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.8rem,4vw,2.75rem)', fontWeight: 900, color: '#fff', marginBottom: 16 }}>

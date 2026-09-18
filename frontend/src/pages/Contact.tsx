@@ -34,10 +34,10 @@ export default function Contact() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Get In Touch</h2>
               <div className="space-y-5">
                 {[
-                  { icon: '📞', title: 'Phone / WhatsApp', lines: ['+91 98765 43210', '+91 98765 43211'] },
-                  { icon: '✉️', title: 'Email', lines: ['info@travelgo.in', 'support@travelgo.in'] },
+                  { icon: '📞', title: 'Phone / WhatsApp', lines: ['+91 98771 24650'] },
+                  { icon: '✉️', title: 'Email', lines: ['hsingh67243@gmail.com'] },
                   { icon: '🕐', title: 'Support Hours', lines: ['24 × 7 — All Days', 'Including holidays'] },
-                  { icon: '📍', title: 'Office', lines: ['New Delhi, India', ''] },
+                  { icon: '📍', title: 'Office', lines: ['India'] },
                 ].map((item) => (
                   <div key={item.title} className="flex gap-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">{item.icon}</div>
