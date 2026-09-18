@@ -385,8 +385,11 @@ export default function Home() {
       </section>
 
       {/* ═══ VIDEO SECTION ═══ */}
-      <section style={{ background: '#0f172a', padding: '5rem 0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
+      <section style={{ background: '#0f172a', padding: '5rem 0', position: 'relative', overflow: 'hidden' }}>
+        {/* Background subtle pattern */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, #1e3a8a22 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem', position: 'relative' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <span style={{ display: 'inline-block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 8 }}>See Us In Action</span>
             <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#fff' }}>
@@ -397,18 +400,35 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ maxWidth: 900, margin: '0 auto', borderRadius: 20, overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }}>
+          {/* Video player — contained, never full-screen background */}
+          <div style={{
+            maxWidth: 860, margin: '0 auto',
+            borderRadius: 20, overflow: 'hidden',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: '#000',
+            position: 'relative',   /* keeps video inside this box */
+            zIndex: 1,
+          }}>
             <video
               controls
-              preload="metadata"
+              preload="none"
               poster="/hero/hero-bg.jpeg"
-              style={{ width: '100%', display: 'block', background: '#000' }}
+              style={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                maxHeight: '500px',
+                objectFit: 'contain',
+                background: '#000',
+              }}
             >
               <source src="/promo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
+              Your browser does not support video playback.
             </video>
           </div>
 
+          {/* Features strip below video */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
             {[
               { icon: '🚌', text: 'Luxury Interiors' },
