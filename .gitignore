@@ -8,12 +8,11 @@ yarn-error.log*
 
 # ─────────────────────────────
 # Environment Variables
-# NEVER commit .env files — they contain passwords and secrets!
 # ─────────────────────────────
 .env
 .env.local
-.env.production
 .env.staging
+# NOTE: .env.production IS committed so Vercel can read VITE_ vars at build time
 
 # ─────────────────────────────
 # Build outputs
@@ -33,3 +32,9 @@ Thumbs.db
 # TypeScript
 # ─────────────────────────────
 *.tsbuildinfo
+
+# ─────────────────────────────
+# Raw images folder (already copied to frontend/public/vehicles)
+# Excluded to keep repo size small for GitHub push
+# ─────────────────────────────
+images and videos/
