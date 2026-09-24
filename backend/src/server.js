@@ -16,16 +16,13 @@ app.use(helmet());
 // In development we allow all localhost ports so port conflicts don't break things
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (Postman, curl, server-to-server)
     if (!origin) return callback(null, true);
-    // Allow any localhost origin in development
-    if (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost')) {
-      return callback(null, true);
-    }
-    // In production, only allow the configured frontend URL
-    if (origin === process.env.FRONTEND_URL) {
-      return callback(null, true);
-    }
+    // Allow localhost in development
+    if (origin.startsWith('http://localhost')) return callback(null, true);
+    // Allow any vercel.app subdomain
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Allow configured frontend URL
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
