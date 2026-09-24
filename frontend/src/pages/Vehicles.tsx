@@ -177,7 +177,7 @@ function VehicleCard({ v }: { v: StaticVehicle }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #f3f4f6' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>{v.seats} Seats • {v.type}</span>
-            <Link to="/contact"
+            <Link to="/booking"
               style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fff', background: '#f97316', padding: '7px 14px', borderRadius: 9, display: 'inline-block' }}>
               Book Now
             </Link>

@@ -54,7 +54,11 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           {isAuthenticated ? (
             <>
-              {isAdmin && <Link to="/admin" className="text-sm font-semibold text-purple-600 hover:text-purple-800">Admin</Link>}
+              {isAdmin && (
+                <>
+                  <Link to="/admin" className="text-sm font-semibold text-purple-600 hover:text-purple-800">Admin Panel</Link>
+                </>
+              )}
               <Link to="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-blue-600">
                 Hi, {user?.name.split(' ')[0]}
               </Link>
@@ -103,7 +107,12 @@ export default function Navbar() {
           <div className="pt-3 border-t border-gray-100 space-y-2">
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl">My Dashboard</Link>
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setOpen(false)} className="block px-4 py-3 text-sm font-semibold text-purple-600 hover:bg-purple-50 rounded-xl">🛡️ Admin Panel</Link>
+                )}
+                <Link to="/dashboard"   onClick={() => setOpen(false)} className="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl">My Dashboard</Link>
+                <Link to="/my-bookings" onClick={() => setOpen(false)} className="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl">My Bookings</Link>
+                <Link to="/profile"     onClick={() => setOpen(false)} className="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl">My Profile</Link>
                 <button onClick={handleLogout} className="block w-full text-left px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl">Logout</button>
               </>
             ) : (
