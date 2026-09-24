@@ -22,7 +22,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Get the stored user from localStorage
-    const storedUser = localStorage.getItem('travelgo_user');
+    const storedUser = localStorage.getItem('firstfly_user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (user.token) {
@@ -47,8 +47,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // 401 = Unauthorized — token expired or invalid
       // Clear the user from localStorage and redirect to login
-      localStorage.removeItem('travelgo_user');
-      window.location.href = '/login';
+      localStorage.removeItem('firstfly_user');
+      // Only redirect if we're not already on the login page
+      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/admin/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
