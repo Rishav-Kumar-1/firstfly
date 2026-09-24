@@ -17,11 +17,14 @@ const crypto    = require('crypto');   // built into Node.js — no install need
 const db        = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/response');
 
-// Create a Razorpay instance using your API keys from .env
-const razorpay = new Razorpay({
-  key_id:     process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Create Razorpay instance only if keys are available
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id:     process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
 
 // ─────────────────────────────────────────────────────────
 // POST /api/payments/create-order
