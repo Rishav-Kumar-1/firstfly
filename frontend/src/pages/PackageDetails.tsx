@@ -120,14 +120,7 @@ export default function PackageDetails() {
           {/* Right: Booking Card */}
           <div>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
-              <h3 className="font-bold text-gray-900 text-lg mb-4">Package Price</h3>
-              <div className="text-center bg-blue-50 rounded-xl p-4 mb-5">
-                <p className="text-xs text-gray-400 mb-1">Starting from</p>
-                <p className="text-3xl font-extrabold text-blue-600">
-                  ₹{pkg.starting_price.toLocaleString('en-IN')}
-                </p>
-                <p className="text-gray-400 text-xs">per person</p>
-              </div>
+              <h3 className="font-bold text-gray-900 text-lg mb-4">Book This Package</h3>
 
               <div className="space-y-2 text-sm mb-5">
                 <div className="flex justify-between"><span className="text-gray-500">Duration</span><span className="font-medium">{pkg.duration_days}D / {pkg.duration_nights}N</span></div>

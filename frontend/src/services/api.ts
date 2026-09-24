@@ -1,16 +1,16 @@
 // api.ts
 // Central API service — all backend calls go through here.
-// Uses axios, which is like fetch() but with more features and cleaner syntax.
 
 import axios from 'axios';
 
-// Create an axios "instance" with default settings
-// Every request made through this instance will use these defaults
+// Use environment variable for production, fallback to localhost for development
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // All requests will start with this URL
-  timeout: 10000,                        // Cancel request if it takes > 10 seconds
+  baseURL: BASE_URL,
+  timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',  // Tell the backend we're sending JSON
+    'Content-Type': 'application/json',
   },
 });
 

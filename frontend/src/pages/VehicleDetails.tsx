@@ -153,32 +153,18 @@ export default function VehicleDetails() {
           {/* ── Right Column: Booking Card ── */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
-              <h3 className="font-bold text-gray-900 text-lg mb-5">Fare Details</h3>
+              <h3 className="font-bold text-gray-900 text-lg mb-4">Book This Vehicle</h3>
 
-              {/* Price Per KM */}
-              <div className="text-center bg-blue-50 rounded-xl p-4 mb-5">
-                <p className="text-3xl font-extrabold text-blue-600">₹{vehicle.price_per_km}</p>
-                <p className="text-gray-500 text-sm">per kilometre</p>
-              </div>
-
-              {/* Charges Breakdown */}
-              <div className="space-y-3 mb-5">
-                {[
-                  { label: 'Price per KM',   value: `₹${vehicle.price_per_km}/km` },
-                  { label: 'Driver Charge',  value: `₹${vehicle.driver_charge}/day` },
-                  { label: 'Toll Charges',   value: 'At actuals' },
-                  { label: 'GST',            value: 'Included' },
-                ].map((item) => (
-                  <div key={item.label} className="flex justify-between text-sm">
-                    <span className="text-gray-500">{item.label}</span>
-                    <span className="font-medium text-gray-800">{item.value}</span>
-                  </div>
-                ))}
+              <div className="space-y-2 text-sm mb-5">
+                <div className="flex justify-between"><span className="text-gray-500">Seating</span><span className="font-medium">{vehicle.seating_capacity} Seats</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Type</span><span className="font-medium">{vehicle.vehicle_type}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">AC</span><span className="font-medium">{vehicle.ac ? 'Air Conditioned' : 'Non-AC'}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Toll Charges</span><span className="font-medium">At actuals</span></div>
               </div>
 
               <div className="border-t border-gray-100 pt-4 mb-5">
                 <p className="text-xs text-gray-400">
-                  Final price depends on distance, trip type, and duration. 
+                  Final price depends on distance, trip type, and duration.
                   Get exact price during booking.
                 </p>
               </div>

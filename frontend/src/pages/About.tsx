@@ -8,7 +8,7 @@ export default function About() {
       {/* Hero */}
       <section style={{ background: 'linear-gradient(135deg,#1e3a8a,#2563eb)', color: '#fff', padding: '5rem 1.5rem', textAlign: 'center' }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <h1 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 800, marginBottom: 16 }}>About TravelGo</h1>
+          <h1 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 800, marginBottom: 16 }}>About FIRSTFLY</h1>
           <p style={{ color: 'rgba(219,234,254,0.85)', fontSize: '1.1rem', lineHeight: 1.7 }}>
             We are passionate about making group travel comfortable, affordable and stress-free for everyone.
           </p>
@@ -20,7 +20,7 @@ export default function About() {
         <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 800, color: '#111827', marginBottom: 24 }}>Our Story</h2>
           <p style={{ color: '#4b5563', lineHeight: 1.8, fontSize: '1.05rem', marginBottom: 16 }}>
-            TravelGo was founded with a simple mission — to make group travel in India as easy as booking a flight ticket.
+            FIRSTFLY was founded with a simple mission — to make group travel in India as easy as booking a flight ticket.
             We noticed that finding reliable, comfortable and fairly priced vehicles for family trips,
             corporate travel and group tours was a frustrating experience.
           </p>

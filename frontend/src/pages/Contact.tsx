@@ -1,18 +1,30 @@
-// Contact.tsx — Contact & Enquiry page
-// NOTE: Navbar and Footer are provided by PublicLayout in App.tsx — do NOT add them here
+// Contact.tsx — Contact & Enquiry page — saves to database
 import { useState } from 'react';
+import { enquiryAPI } from '../services/api';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+    try {
+      await enquiryAPI.submit(form);
+      setSubmitted(true);
+    } catch {
+      setError('Failed to send message. Please try again or call us directly.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,16 +61,14 @@ export default function Contact() {
                 </div>
               ))}
             </div>
-
-            {/* Quick contact buttons */}
             <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
               <a href="tel:+919877124650"
                 style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#2563eb', color: '#fff', padding: '11px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.875rem', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' }}>
                 📞 Call Now
               </a>
-              <a href="mailto:hsingh67243@gmail.com"
-                style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', color: '#2563eb', padding: '11px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.875rem', border: '1.5px solid #bfdbfe' }}>
-                ✉️ Send Email
+              <a href="https://wa.me/919877124650"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#16a34a', color: '#fff', padding: '11px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.875rem' }}>
+                💬 WhatsApp
               </a>
             </div>
           </div>
@@ -70,7 +80,7 @@ export default function Contact() {
                 <div style={{ fontSize: '3.5rem', marginBottom: 16 }}>✅</div>
                 <h3 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: '#111827', marginBottom: 8 }}>Message Sent!</h3>
                 <p style={{ color: '#6b7280', marginBottom: 20 }}>We'll get back to you within 24 hours.</p>
-                <button onClick={() => setSubmitted(false)}
+                <button onClick={() => { setSubmitted(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }); }}
                   style={{ color: '#2563eb', background: 'none', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit' }}>
                   Send another message
                 </button>
@@ -78,6 +88,11 @@ export default function Contact() {
             ) : (
               <>
                 <h2 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, fontSize: '1.3rem', color: '#111827', marginBottom: 22 }}>Send us a Message</h2>
+                {error && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: '0.85rem' }}>
+                    ⚠️ {error}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div>
@@ -98,6 +113,8 @@ export default function Contact() {
                     <select name="subject" value={form.subject} onChange={handleChange} style={INP}>
                       <option value="">Select subject</option>
                       <option value="booking">Booking Enquiry</option>
+                      <option value="vehicle">Vehicle Query</option>
+                      <option value="package">Package Query</option>
                       <option value="cancellation">Cancellation / Refund</option>
                       <option value="complaint">Complaint</option>
                       <option value="feedback">Feedback</option>
@@ -110,9 +127,11 @@ export default function Contact() {
                       placeholder="Tell us how we can help you..."
                       style={{ ...INP, resize: 'none' } as React.CSSProperties} />
                   </div>
-                  <button type="submit"
-                    style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: 12, padding: '13px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,0.3)', fontFamily: 'inherit' }}>
-                    Send Message →
+                  <button type="submit" disabled={loading}
+                    style={{ background: loading ? '#9ca3af' : '#2563eb', color: '#fff', border: 'none', borderRadius: 12, padding: '13px', fontWeight: 700, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,0.3)', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    {loading ? (
+                      <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style> Sending...</>
+                    ) : 'Send Message →'}
                   </button>
                 </form>
               </>
@@ -124,12 +143,5 @@ export default function Contact() {
   );
 }
 
-const LBL: React.CSSProperties = {
-  display: 'block', fontSize: '0.78rem', fontWeight: 600,
-  color: '#374151', marginBottom: 5,
-};
-const INP: React.CSSProperties = {
-  width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10,
-  padding: '10px 14px', fontSize: '0.9rem', color: '#111827',
-  background: '#fff', outline: 'none', fontFamily: 'Inter,system-ui,sans-serif',
-};
+const LBL: React.CSSProperties = { display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#374151', marginBottom: 5 };
+const INP: React.CSSProperties = { width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '10px 14px', fontSize: '0.9rem', color: '#111827', background: '#fff', outline: 'none', fontFamily: 'Inter,system-ui,sans-serif' };

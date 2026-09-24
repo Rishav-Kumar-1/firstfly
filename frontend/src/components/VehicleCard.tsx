@@ -92,12 +92,11 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
           )}
         </div>
 
-        {/* Price + Actions */}
+        {/* Actions */}
         <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-          <div>
-            <span className="text-2xl font-bold text-blue-600">₹{vehicle.price_per_km}</span>
-            <span className="text-gray-400 text-sm">/km</span>
-          </div>
+          <p className="text-gray-500 text-sm flex items-center gap-1">
+            <span>🚌</span> {vehicle.vehicle_type}
+          </p>
           <div className="flex gap-2">
             <Link
               to={`/vehicles/${vehicle.id}`}

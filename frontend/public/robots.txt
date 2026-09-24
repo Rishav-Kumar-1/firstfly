@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap location (update with your real domain after deployment)
+Sitemap: https://firstfly.in/sitemap.xml

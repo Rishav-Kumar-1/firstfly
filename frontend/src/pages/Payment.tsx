@@ -1,23 +1,18 @@
-// Payment.tsx — Pay for an existing booking from the dashboard
+// Payment.tsx — Booking confirmation page
 
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useRazorpay } from '../hooks/useRazorpay';
 import { paymentAPI } from '../services/api';
 import Loading from '../components/Loading';
 
 export default function Payment() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
-  const { openPayment, processing } = useRazorpay();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [booking, setBooking]   = useState<any>(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
   const [success, setSuccess]   = useState(false);
-  const [payError, setPayError] = useState('');
 
   useEffect(() => {
     paymentAPI.getStatus(Number(id))
@@ -25,23 +20,6 @@ export default function Payment() {
       .catch(() => setError('Booking not found.'))
       .finally(() => setLoading(false));
   }, [id]);
-
-  const handlePay = () => {
-    if (!booking || !user) return;
-    setPayError('');
-    openPayment({
-      bookingId: booking.id,
-      userName:  user.name,
-      userEmail: user.email,
-      onSuccess: () => {
-        setSuccess(true);
-        setBooking((p: object) => ({ ...p, payment_status: 'PAID', booking_status: 'CONFIRMED' }));
-      },
-      onFailure: (msg) => {
-        if (!msg.includes('cancelled')) setPayError(msg);
-      },
-    });
-  };
 
   if (loading) return <Loading fullScreen message="Loading booking..." />;
 
@@ -58,54 +36,40 @@ export default function Payment() {
         ) : success ? (
           <div style={{ textAlign: 'center', background: '#fff', borderRadius: 20, padding: '2.5rem', border: '1px solid #e5e7eb', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
             <div style={{ width: 80, height: 80, background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', margin: '0 auto 1.25rem' }}>🎉</div>
-            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.4rem', fontWeight: 800, color: '#111827', marginBottom: 8 }}>Payment Successful!</h2>
-            <p style={{ color: '#6b7280', marginBottom: 20 }}>Your booking <strong>{booking?.booking_reference}</strong> is now confirmed.</p>
+            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.4rem', fontWeight: 800, color: '#111827', marginBottom: 8 }}>Booking Confirmed!</h2>
+            <p style={{ color: '#6b7280', marginBottom: 20 }}>Your booking <strong>{booking?.booking_reference}</strong> is confirmed. Our team will contact you shortly.</p>
             <Link to="/dashboard" style={{ background: '#2563eb', color: '#fff', padding: '12px 28px', borderRadius: 14, fontWeight: 700, display: 'inline-block', boxShadow: '0 4px 14px rgba(37,99,235,0.25)' }}>View My Bookings</Link>
-          </div>
-        ) : booking?.payment_status === 'PAID' ? (
-          <div style={{ textAlign: 'center', background: '#fff', borderRadius: 20, padding: '2.5rem', border: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '3rem', marginBottom: 12 }}>✅</div>
-            <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.3rem', fontWeight: 800, color: '#16a34a', marginBottom: 8 }}>Already Paid</h2>
-            <p style={{ color: '#6b7280', marginBottom: 20 }}>This booking is already paid and confirmed.</p>
-            <Link to="/dashboard" style={{ background: '#2563eb', color: '#fff', padding: '12px 28px', borderRadius: 14, fontWeight: 700, display: 'inline-block' }}>Go to Dashboard</Link>
           </div>
         ) : (
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #e5e7eb', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <h1 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.4rem', fontWeight: 800, color: '#111827' }}>Complete Payment</h1>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4 }}>Booking: {booking?.booking_reference}</p>
+              <h1 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.4rem', fontWeight: 800, color: '#111827' }}>Booking Details</h1>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4 }}>Reference: {booking?.booking_reference}</p>
             </div>
 
             <div style={{ background: '#f0fdf4', borderRadius: 14, padding: '1.25rem', textAlign: 'center', marginBottom: 20 }}>
-              <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: 4 }}>Amount to Pay</p>
-              <p style={{ fontSize: '2.2rem', fontWeight: 900, color: '#16a34a', fontFamily: 'Poppins,sans-serif' }}>
-                ₹{Number(booking?.total_amount || 0).toLocaleString('en-IN')}
+              <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: 4 }}>Route</p>
+              <p style={{ fontSize: '1rem', fontWeight: 700, color: '#111827' }}>{booking?.from_location} → {booking?.to_location}</p>
+              <p style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: 6 }}>
+                {booking?.travel_date ? new Date(booking.travel_date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : ''}
               </p>
-              <p style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: 4 }}>{booking?.from_location} → {booking?.to_location}</p>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {[['📱','UPI'],['💳','Cards'],['🏦','Net Banking'],['👛','Wallets']].map(([ic, lb]) => (
-                <div key={lb} style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, color: '#374151' }}>
-                  <span>{ic}</span> {lb}
-                </div>
-              ))}
+            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+              <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#92400e', marginBottom: 4 }}>📞 Contact Us to Confirm</p>
+              <p style={{ fontSize: '0.85rem', color: '#78350f', lineHeight: 1.6 }}>
+                Call or WhatsApp us at <strong>+91 98771 24650</strong> to confirm your booking and arrange payment.
+              </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 14px', marginBottom: 20 }}>
-              <span>🔒</span>
-              <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Secured by <strong>Razorpay</strong>. 256-bit SSL encrypted.</p>
-            </div>
+            <a href="tel:+919877124650"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 14, padding: '15px', fontSize: '1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 18px rgba(37,99,235,0.3)', marginBottom: 12 }}>
+              📞 Call Now
+            </a>
 
-            {payError && (
-              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: '0.85rem' }}>
-                ⚠️ {payError}
-              </div>
-            )}
-
-            <button onClick={handlePay} disabled={processing}
-              style={{ width: '100%', background: 'linear-gradient(135deg,#2563eb,#1d4ed8)', color: '#fff', border: 'none', borderRadius: 14, padding: '15px', fontSize: '1rem', fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer', opacity: processing ? 0.8 : 1, boxShadow: '0 4px 18px rgba(37,99,235,0.3)', fontFamily: 'inherit' }}>
-              {processing ? 'Processing...' : `💳 Pay ₹${Number(booking?.total_amount || 0).toLocaleString('en-IN')}`}
+            <button onClick={() => { setSuccess(true); }}
+              style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 14, padding: '13px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              ✅ Mark as Confirmed
             </button>
 
             <div style={{ textAlign: 'center', marginTop: 14 }}>

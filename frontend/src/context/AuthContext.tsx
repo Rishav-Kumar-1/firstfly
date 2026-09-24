@@ -2,7 +2,8 @@
 // This context stores the logged-in user's info and makes it available
 // to ANY component in the app — without prop drilling.
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { AuthUser } from '../types';
 
 // Define what the AuthContext will provide to components

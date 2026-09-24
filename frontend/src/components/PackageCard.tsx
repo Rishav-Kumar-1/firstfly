@@ -50,12 +50,11 @@ export default function PackageCard({ pkg }: PackageCardProps) {
           </div>
         )}
 
-        {/* Price + Actions */}
+        {/* Actions */}
         <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-          <div>
-            <p className="text-xs text-gray-400">Starting from</p>
-            <span className="text-2xl font-bold text-blue-600">₹{pkg.starting_price.toLocaleString('en-IN')}</span>
-          </div>
+          <span className="text-sm font-medium text-gray-500">
+            {pkg.duration_days}D / {pkg.duration_nights}N
+          </span>
           <div className="flex gap-2">
             <Link
               to={`/packages/${pkg.id}`}

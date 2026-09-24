@@ -11,8 +11,10 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xl"
-                style={{ background: 'linear-gradient(135deg,#2563eb,#6366f1)', fontFamily: 'Poppins,sans-serif' }}>T</div>
-              <span className="font-black text-xl text-white" style={{ fontFamily: 'Poppins,sans-serif' }}>TravelGo</span>
+                style={{ background: 'linear-gradient(135deg,#2563eb,#6366f1)', fontFamily: 'Poppins,sans-serif' }}>F</div>
+              <span className="font-black text-xl text-white" style={{ fontFamily: 'Poppins,sans-serif' }}>
+                <span style={{ color: '#60a5fa' }}>FIRST</span><span style={{ color: '#fff' }}>FLY</span>
+              </span>
             </div>
             <p style={{ color: '#94a3b8', lineHeight: '1.7', fontSize: '0.875rem' }} className="mb-5">
               India's trusted platform for booking comfortable travel vehicles. Verified drivers.
@@ -87,7 +89,7 @@ export default function Footer() {
       <div style={{ borderTop: '1px solid #1e293b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3"
           style={{ color: '#64748b', fontSize: '0.8rem' }}>
-          <p>© {year} TravelGo. All rights reserved. Made with ❤️ in India</p>
+          <p>© {year} FIRSTFLY. All rights reserved. Made with ❤️ in India</p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms', 'Cancellation'].map(t => (
               <a key={t} href="#" className="hover:text-gray-400 transition-colors">{t}</a>

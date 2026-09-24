@@ -33,9 +33,9 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 flex-shrink-0">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xl"
-            style={{ background: 'linear-gradient(135deg,#2563eb,#6366f1)', fontFamily: 'Poppins,sans-serif' }}>T</div>
+            style={{ background: 'linear-gradient(135deg,#2563eb,#6366f1)', fontFamily: 'Poppins,sans-serif' }}>F</div>
           <span className="font-black text-xl" style={{ fontFamily: 'Poppins,sans-serif' }}>
-            <span style={{ color: '#2563eb' }}>Travel</span><span style={{ color: '#111827' }}>Go</span>
+            <span style={{ color: '#2563eb' }}>FIRST</span><span style={{ color: '#111827' }}>FLY</span>
           </span>
         </Link>
 

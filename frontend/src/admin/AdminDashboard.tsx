@@ -94,7 +94,7 @@ export default function AdminDashboard() {
         setCustomers(r.data.data || []);
       },
       enquiries: async () => {
-        const r = await enquiryAPI.getAll ? enquiryAPI.getAll() : adminAPI.getAllEnquiries();
+        const r = await (enquiryAPI.getAll ? enquiryAPI.getAll() : adminAPI.getAllEnquiries());
         setEnquiries(r.data.data || []);
       },
     };
@@ -123,9 +123,9 @@ export default function AdminDashboard() {
       {/* Logo */}
       <div className="p-5 border-b border-gray-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">T</div>
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">F</div>
           <div>
-            <p className="font-bold text-white text-sm">TravelGo</p>
+            <p className="font-bold text-white text-sm">FIRSTFLY</p>
             <p className="text-gray-400 text-xs">Admin Panel</p>
           </div>
         </div>
@@ -199,8 +199,8 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <StatCard label="Total Customers"   value={stats.stats.total_customers}    icon="👥" color="bg-purple-500" />
                     <StatCard label="Total Vehicles"    value={stats.stats.total_vehicles}     icon="🚌" color="bg-cyan-500" />
-                    <StatCard label="Total Revenue"     value={`₹${Number(stats.stats.total_revenue).toLocaleString('en-IN')}`} icon="💰" color="bg-orange-500" />
                     <StatCard label="New Enquiries"     value={stats.stats.new_enquiries}      icon="📩" color="bg-red-500" />
+                    <StatCard label="Completed Trips"   value={stats.stats.completed_bookings || 0} icon="✅" color="bg-green-500" />
                   </div>
 
                   {/* Popular Vehicles */}
@@ -229,51 +229,42 @@ export default function AdminDashboard() {
               {/* ── BOOKINGS TAB ── */}
               {activeTab === 'bookings' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100">
+                  <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                     <p className="text-sm text-gray-500">{bookings.length} booking(s)</p>
+                    <button onClick={() => { setLoading(true); adminAPI.getAllBookings().then(r => setBookings(r.data.data || [])).catch(() => {}).finally(() => setLoading(false)); }}
+                      className="text-xs text-blue-600 hover:underline">↻ Refresh</button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          {['Reference','Customer','Route','Date','Vehicle','Status','Amount','Action'].map(h => (
-                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
-                              {h}
-                            </th>
+                          {['Reference','Customer','Phone','Route','Date','Vehicle','Passengers','Status','Action'].map(h => (
+                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {bookings.length === 0 ? (
-                          <tr><td colSpan={8} className="text-center py-12 text-gray-400">No bookings yet</td></tr>
+                          <tr><td colSpan={9} className="text-center py-12 text-gray-400">No bookings yet</td></tr>
                         ) : bookings.map(b => (
                           <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-3 font-semibold text-blue-600 whitespace-nowrap">{b.booking_reference}</td>
-                            <td className="px-4 py-3">
-                              <p className="font-medium text-gray-900">{b.customer_name}</p>
-                              <p className="text-gray-400 text-xs">{b.customer_phone}</p>
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-gray-700">
-                              {b.from_location} → {b.to_location}
-                            </td>
+                            <td className="px-4 py-3 font-bold text-blue-600 whitespace-nowrap">{b.booking_reference}</td>
+                            <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{b.customer_name}</td>
+                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{b.customer_phone}</td>
+                            <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{b.from_location} → {b.to_location}</td>
                             <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                              {new Date(b.travel_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                              {new Date(b.travel_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </td>
                             <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{b.vehicle_name}</td>
+                            <td className="px-4 py-3 text-center text-gray-700">{b.passengers}</td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[b.booking_status]}`}>
                                 {b.booking_status}
                               </span>
                             </td>
-                            <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">
-                              ₹{Number(b.total_amount).toLocaleString('en-IN')}
-                            </td>
                             <td className="px-4 py-3">
-                              <select
-                                value={b.booking_status}
-                                onChange={e => handleBookingStatus(b.id, e.target.value)}
-                                className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                              >
+                              <select value={b.booking_status} onChange={e => handleBookingStatus(b.id, e.target.value)}
+                                className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
                                 {['PENDING','CONFIRMED','ASSIGNED','ONGOING','COMPLETED','CANCELLED'].map(s => (
                                   <option key={s} value={s}>{s}</option>
                                 ))}
@@ -290,20 +281,15 @@ export default function AdminDashboard() {
               {/* ── VEHICLES TAB ── */}
               {activeTab === 'vehicles' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                  <div className="p-4 border-b border-gray-100">
                     <p className="text-sm text-gray-500">{vehicles.length} vehicle(s)</p>
-                    <Link to="/contact" className="text-xs bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                      + Add Vehicle (API)
-                    </Link>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          {['Vehicle','Type','Seats','Price/km','AC','Status'].map(h => (
-                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                              {h}
-                            </th>
+                          {['Vehicle','Type','Seats','AC','Status'].map(h => (
+                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -313,7 +299,6 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3 font-medium text-gray-900">{v.name}</td>
                             <td className="px-4 py-3 text-gray-500">{v.vehicle_type}</td>
                             <td className="px-4 py-3 text-gray-700">{v.seating_capacity}</td>
-                            <td className="px-4 py-3 text-gray-700">₹{v.price_per_km}</td>
                             <td className="px-4 py-3">
                               <span className={`text-xs font-medium ${v.ac ? 'text-blue-600' : 'text-gray-400'}`}>
                                 {v.ac ? '❄️ AC' : 'Non-AC'}
@@ -374,34 +359,80 @@ export default function AdminDashboard() {
 
               {/* ── ENQUIRIES TAB ── */}
               {activeTab === 'enquiries' && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500">{enquiries.length} enquiry(s)</p>
+                    <button onClick={async () => { setLoading(true); try { const r = await (enquiryAPI.getAll ? enquiryAPI.getAll() : adminAPI.getAllEnquiries()); setEnquiries(r.data.data || []); } catch{} finally { setLoading(false); } }}
+                      className="text-xs text-blue-600 hover:underline">↻ Refresh</button>
                   </div>
-                  <div className="divide-y divide-gray-50">
-                    {enquiries.length === 0 ? (
-                      <div className="text-center py-12 text-gray-400">No enquiries yet</div>
-                    ) : enquiries.map(e => (
-                      <div key={e.id} className="p-5 hover:bg-gray-50">
-                        <div className="flex items-start justify-between gap-4 flex-wrap">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-gray-900">{e.name}</span>
-                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[e.status] || 'bg-gray-100 text-gray-600'}`}>
-                                {e.status}
-                              </span>
+
+                  {enquiries.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-gray-100 text-center py-16">
+                      <div className="text-5xl mb-3">📩</div>
+                      <p className="font-semibold text-gray-700 mb-1">No enquiries yet</p>
+                      <p className="text-sm text-gray-400">Customer messages from the Contact page will appear here.</p>
+                    </div>
+                  ) : enquiries.map(e => (
+                    <div key={e.id} className={`bg-white rounded-2xl border p-5 ${e.status === 'NEW' ? 'border-blue-200 shadow-sm' : 'border-gray-100'}`}>
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          {/* Header row */}
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                              {(e.name || 'U')[0].toUpperCase()}
                             </div>
-                            <p className="text-sm text-blue-600">{e.subject || 'General Enquiry'}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">{e.email} • {e.phone}</p>
-                            <p className="text-sm text-gray-600 mt-2 max-w-xl">{e.message}</p>
+                            <div>
+                              <p className="font-bold text-gray-900 text-sm">{e.name}</p>
+                              <p className="text-xs text-gray-400">{e.email} • {e.phone}</p>
+                            </div>
+                            <span className={`ml-auto text-xs font-semibold px-2.5 py-1 rounded-full ${e.status === 'NEW' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {e.status === 'NEW' ? '🔵 New' : '✓ Read'}
+                            </span>
                           </div>
-                          <p className="text-xs text-gray-400 whitespace-nowrap">
+
+                          {/* Subject */}
+                          {e.subject && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Subject:</span>
+                              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full capitalize">{e.subject}</span>
+                            </div>
+                          )}
+
+                          {/* Message */}
+                          <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-3">{e.message}</p>
+
+                          {/* Quick reply links */}
+                          <div className="flex gap-3 mt-3 flex-wrap">
+                            <a href={`tel:${e.phone}`}
+                              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700">
+                              📞 Call
+                            </a>
+                            <a href={`mailto:${e.email}?subject=Re: ${e.subject || 'Your Enquiry'}&body=Hi ${e.name},%0A%0AThank you for contacting FIRSTFLY.%0A%0A`}
+                              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-800">
+                              ✉️ Reply Email
+                            </a>
+                            {e.phone && (
+                              <a href={`https://wa.me/91${e.phone.replace(/\D/g,'')}?text=Hi ${e.name}, thank you for contacting FIRSTFLY. `}
+                                target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-green-600 px-3 py-1.5 rounded-lg hover:bg-green-700">
+                                💬 WhatsApp
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Date + time */}
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs text-gray-400">
                             {new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {new Date(e.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </>

@@ -187,21 +187,11 @@ export default function Dashboard() {
 
                     {/* Amount + Actions */}
                     <div className="flex flex-col items-end gap-2">
-                      <p className="font-extrabold text-gray-900 text-lg">
-                        ₹{Number(booking.total_amount).toLocaleString('en-IN')}
-                      </p>
-
                       <div className="flex gap-2">
                         <Link to={`/booking/${booking.id}`}
                           className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
                           View
                         </Link>
-                        {booking.payment_status === 'PENDING' && booking.booking_status !== 'CANCELLED' && (
-                          <Link to={`/payment/${booking.id}`}
-                            className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors font-semibold">
-                            Pay Now
-                          </Link>
-                        )}
                         {['PENDING', 'CONFIRMED'].includes(booking.booking_status) && (
                           <button
                             onClick={() => handleCancel(booking.id)}
