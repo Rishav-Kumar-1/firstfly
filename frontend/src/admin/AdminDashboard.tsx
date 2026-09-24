@@ -7,6 +7,146 @@ import { adminAPI, vehicleAPI, enquiryAPI } from '../services/api';
 import Loading from '../components/Loading';
 
 // ─────────────────────────────────────────────
+// VEHICLE FORM (Add / Edit)
+// ─────────────────────────────────────────────
+const EMPTY_VEHICLE = {
+  name: '', vehicle_type: 'SEDAN', registration_number: '',
+  seating_capacity: '4', price_per_km: '', driver_charge: '0',
+  ac: true, pushback_seats: false, music_system: false,
+  luggage_capacity: 'Medium', description: '', image_url: '', status: 'AVAILABLE',
+};
+
+function VehicleModal({ vehicle, onClose, onSave }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  vehicle: any | null;
+  onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSave: (data: any) => Promise<void>;
+}) {
+  const [form, setForm]   = useState(vehicle ? {
+    name: vehicle.name, vehicle_type: vehicle.vehicle_type,
+    registration_number: vehicle.registration_number,
+    seating_capacity: String(vehicle.seating_capacity),
+    price_per_km: String(vehicle.price_per_km),
+    driver_charge: String(vehicle.driver_charge || 0),
+    ac: !!vehicle.ac, pushback_seats: !!vehicle.pushback_seats,
+    music_system: !!vehicle.music_system,
+    luggage_capacity: vehicle.luggage_capacity || 'Medium',
+    description: vehicle.description || '', image_url: vehicle.image_url || '',
+    status: vehicle.status,
+  } : EMPTY_VEHICLE);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState('');
+
+  const ch = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setForm(p => ({ ...p, [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value }));
+  };
+
+  const handleSave = async () => {
+    if (!form.name || !form.registration_number || !form.price_per_km) {
+      setErr('Name, registration number and price per km are required.'); return;
+    }
+    setSaving(true); setErr('');
+    try {
+      await onSave({
+        ...form,
+        seating_capacity: Number(form.seating_capacity),
+        price_per_km: Number(form.price_per_km),
+        driver_charge: Number(form.driver_charge),
+      });
+      onClose();
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      setErr(err.response?.data?.message || 'Failed to save vehicle.');
+    } finally { setSaving(false); }
+  };
+
+  const inp = 'w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <h2 className="font-bold text-gray-900 text-lg">{vehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl">✕</button>
+        </div>
+        <div className="p-5 space-y-4">
+          {err && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-2.5 text-sm">⚠️ {err}</div>}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Vehicle Name *</label>
+              <input name="name" value={form.name} onChange={ch} placeholder="e.g. Toyota Innova Crysta" className={inp} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Type</label>
+              <select name="vehicle_type" value={form.vehicle_type} onChange={ch} className={inp}>
+                {['SEDAN','SUV','MINIVAN','BUS','TRAVELLER','LUXURY'].map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Status</label>
+              <select name="status" value={form.status} onChange={ch} className={inp}>
+                {['AVAILABLE','UNAVAILABLE','MAINTENANCE'].map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Registration Number *</label>
+              <input name="registration_number" value={form.registration_number} onChange={ch} placeholder="e.g. PB-10-XX-1234" className={inp} disabled={!!vehicle} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Seats</label>
+              <input type="number" name="seating_capacity" value={form.seating_capacity} onChange={ch} min="1" max="50" className={inp} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Price / km (₹) *</label>
+              <input type="number" name="price_per_km" value={form.price_per_km} onChange={ch} placeholder="e.g. 12" className={inp} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Driver Charge (₹)</label>
+              <input type="number" name="driver_charge" value={form.driver_charge} onChange={ch} placeholder="e.g. 300" className={inp} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Luggage Capacity</label>
+              <select name="luggage_capacity" value={form.luggage_capacity} onChange={ch} className={inp}>
+                {['Small','Medium','Large','Extra Large'].map(l => <option key={l}>{l}</option>)}
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Image URL</label>
+              <input name="image_url" value={form.image_url} onChange={ch} placeholder="https://..." className={inp} />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Description</label>
+              <textarea name="description" value={form.description} onChange={ch} rows={2} className={inp + ' resize-none'} placeholder="Short description..." />
+            </div>
+            <div className="col-span-2 flex gap-6">
+              {[['ac','❄️ AC'],['pushback_seats','💺 Pushback Seats'],['music_system','🎵 Music System']].map(([k, l]) => (
+                <label key={k} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input type="checkbox" name={k} checked={!!(form as Record<string,unknown>)[k]} onChange={ch} className="w-4 h-4 rounded accent-blue-600" />
+                  {l}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-3 p-5 border-t border-gray-100">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            className="flex-2 flex-1 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-60"
+            style={{ background: saving ? '#9ca3af' : 'linear-gradient(135deg,#2563eb,#1d4ed8)' }}>
+            {saving ? 'Saving...' : vehicle ? 'Save Changes' : 'Add Vehicle'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // SIDEBAR NAV
 // ─────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -72,6 +212,8 @@ export default function AdminDashboard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [enquiries, setEnquiries] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [vehicleModal, setVehicleModal] = useState<{ open: boolean; vehicle: unknown }>({ open: false, vehicle: null });
+  const [deletingVehicle, setDeletingVehicle] = useState<number | null>(null);
 
   // Load data when tab changes
   useEffect(() => {
@@ -108,6 +250,29 @@ export default function AdminDashboard() {
       await adminAPI.updateBookingStatus(id, status);
       setBookings(prev => prev.map(b => b.id === id ? { ...b, booking_status: status } : b));
     } catch { alert('Failed to update status.'); }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleVehicleSave = async (data: any) => {
+    if ((vehicleModal.vehicle as { id?: number })?.id) {
+      const updated = await vehicleAPI.update((vehicleModal.vehicle as { id: number }).id, data);
+      setVehicles(prev => prev.map(v => v.id === (vehicleModal.vehicle as { id: number }).id ? updated.data.data : v));
+    } else {
+      const created = await vehicleAPI.create(data);
+      setVehicles(prev => [created.data.data, ...prev]);
+    }
+  };
+
+  const handleVehicleDelete = async (id: number, name: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    setDeletingVehicle(id);
+    try {
+      await vehicleAPI.delete(id);
+      setVehicles(prev => prev.filter(v => v.id !== id));
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || 'Failed to delete vehicle.');
+    } finally { setDeletingVehicle(null); }
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -281,33 +446,56 @@ export default function AdminDashboard() {
               {/* ── VEHICLES TAB ── */}
               {activeTab === 'vehicles' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100">
+                  <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                     <p className="text-sm text-gray-500">{vehicles.length} vehicle(s)</p>
+                    <button
+                      onClick={() => setVehicleModal({ open: true, vehicle: null })}
+                      className="flex items-center gap-2 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                      + Add Vehicle
+                    </button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          {['Vehicle','Type','Seats','AC','Status'].map(h => (
-                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                          {['Vehicle','Type','Seats','AC','Price/km','Status','Actions'].map(h => (
+                            <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {vehicles.map(v => (
-                          <tr key={v.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 font-medium text-gray-900">{v.name}</td>
-                            <td className="px-4 py-3 text-gray-500">{v.vehicle_type}</td>
+                        {vehicles.length === 0 ? (
+                          <tr><td colSpan={7} className="text-center py-12 text-gray-400">No vehicles yet</td></tr>
+                        ) : vehicles.map(v => (
+                          <tr key={v.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{v.name}</td>
+                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.vehicle_type}</td>
                             <td className="px-4 py-3 text-gray-700">{v.seating_capacity}</td>
                             <td className="px-4 py-3">
                               <span className={`text-xs font-medium ${v.ac ? 'text-blue-600' : 'text-gray-400'}`}>
                                 {v.ac ? '❄️ AC' : 'Non-AC'}
                               </span>
                             </td>
+                            <td className="px-4 py-3 text-gray-700 whitespace-nowrap">₹{v.price_per_km}/km</td>
                             <td className="px-4 py-3">
                               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[v.status]}`}>
                                 {v.status}
                               </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setVehicleModal({ open: true, vehicle: v })}
+                                  className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
+                                  ✏️ Edit
+                                </button>
+                                <button
+                                  onClick={() => handleVehicleDelete(v.id, v.name)}
+                                  disabled={deletingVehicle === v.id}
+                                  className="text-xs text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 whitespace-nowrap">
+                                  {deletingVehicle === v.id ? '...' : '🗑 Delete'}
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -439,6 +627,15 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
+
+      {/* Vehicle Add/Edit Modal */}
+      {vehicleModal.open && (
+        <VehicleModal
+          vehicle={vehicleModal.vehicle}
+          onClose={() => setVehicleModal({ open: false, vehicle: null })}
+          onSave={handleVehicleSave}
+        />
+      )}
     </div>
   );
 }

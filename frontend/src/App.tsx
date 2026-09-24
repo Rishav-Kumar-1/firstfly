@@ -12,6 +12,7 @@ import PackageDetails from './pages/PackageDetails'
 import Destinations from './pages/Destinations'
 import DestinationDetail from './pages/DestinationDetail'
 import Booking from './pages/Booking'
+import BookingDetail from './pages/BookingDetail'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import MyBookings from './pages/MyBookings'
@@ -111,6 +112,11 @@ function App() {
         <Route path="/payment/:id" element={
           <ProtectedRoute>
             <Payment />
+          </ProtectedRoute>
+        } />
+        <Route path="/booking/:id" element={
+          <ProtectedRoute>
+            <PublicLayout><BookingDetail /></PublicLayout>
           </ProtectedRoute>
         } />
 
