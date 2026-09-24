@@ -15,10 +15,13 @@ const getDashboard = async (req, res) => {
     const [[todayBookings]]   = await db.query('SELECT COUNT(*) AS count FROM bookings WHERE DATE(created_at) = ?', [today]);
     const [[pendingBookings]] = await db.query("SELECT COUNT(*) AS count FROM bookings WHERE booking_status = 'PENDING'");
     const [[confirmedBookings]] = await db.query("SELECT COUNT(*) AS count FROM bookings WHERE booking_status = 'CONFIRMED'");
+    const [[completedBookings]] = await db.query("SELECT COUNT(*) AS count FROM bookings WHERE booking_status = 'COMPLETED'");
+    const [[cancelledBookings]] = await db.query("SELECT COUNT(*) AS count FROM bookings WHERE booking_status = 'CANCELLED'");
     const [[totalCustomers]]  = await db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'CUSTOMER'");
     const [[totalVehicles]]   = await db.query('SELECT COUNT(*) AS count FROM vehicles');
     const [[revenue]]         = await db.query("SELECT COALESCE(SUM(total_amount), 0) AS total FROM bookings WHERE payment_status = 'PAID'");
     const [[newEnquiries]]    = await db.query("SELECT COUNT(*) AS count FROM enquiries WHERE status = 'NEW'");
+    const [[totalEnquiries]]  = await db.query("SELECT COUNT(*) AS count FROM enquiries");
 
     // Monthly bookings for chart (last 6 months)
     const [monthlyBookings] = await db.query(`
@@ -48,10 +51,13 @@ const getDashboard = async (req, res) => {
         today_bookings:     todayBookings.count,
         pending_bookings:   pendingBookings.count,
         confirmed_bookings: confirmedBookings.count,
+        completed_bookings: completedBookings.count,
+        cancelled_bookings: cancelledBookings.count,
         total_customers:    totalCustomers.count,
         total_vehicles:     totalVehicles.count,
         total_revenue:      parseFloat(revenue.total),
         new_enquiries:      newEnquiries.count,
+        total_enquiries:    totalEnquiries.count,
       },
       monthly_bookings: monthlyBookings,
       popular_vehicles: popularVehicles,

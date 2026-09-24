@@ -130,7 +130,6 @@ export const adminAPI = {
   updateBookingStatus: (id: number, status: string) =>
     api.put(`/admin/bookings/${id}/status`, { status }),
   getAllCustomers: () => api.get('/admin/customers'),
-  getAllEnquiries: () => api.get('/enquiries'),
 };
 
 // ─────────────────────────────────────────────

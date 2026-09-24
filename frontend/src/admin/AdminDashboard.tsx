@@ -236,7 +236,7 @@ export default function AdminDashboard() {
         setCustomers(r.data.data || []);
       },
       enquiries: async () => {
-        const r = await (enquiryAPI.getAll ? enquiryAPI.getAll() : adminAPI.getAllEnquiries());
+        const r = await enquiryAPI.getAll();
         setEnquiries(r.data.data || []);
       },
     };
@@ -355,17 +355,26 @@ export default function AdminDashboard() {
               {/* ── DASHBOARD TAB ── */}
               {activeTab === 'dashboard' && stats && (
                 <div className="space-y-6">
+                  {/* Row 1 — Booking counts */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <StatCard label="Total Bookings"    value={stats.stats.total_bookings}     icon="📋" color="bg-blue-500" />
                     <StatCard label="Today's Bookings"  value={stats.stats.today_bookings}     icon="📅" color="bg-indigo-500" />
                     <StatCard label="Pending"           value={stats.stats.pending_bookings}   icon="⏳" color="bg-yellow-500" />
                     <StatCard label="Confirmed"         value={stats.stats.confirmed_bookings} icon="✅" color="bg-green-500" />
                   </div>
+                  {/* Row 2 — Operations */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <StatCard label="Completed Trips"   value={stats.stats.completed_bookings} icon="🏁" color="bg-emerald-500" />
+                    <StatCard label="Cancelled"         value={stats.stats.cancelled_bookings} icon="❌" color="bg-red-400" />
                     <StatCard label="Total Customers"   value={stats.stats.total_customers}    icon="👥" color="bg-purple-500" />
                     <StatCard label="Total Vehicles"    value={stats.stats.total_vehicles}     icon="🚌" color="bg-cyan-500" />
-                    <StatCard label="New Enquiries"     value={stats.stats.new_enquiries}      icon="📩" color="bg-red-500" />
-                    <StatCard label="Completed Trips"   value={stats.stats.completed_bookings || 0} icon="✅" color="bg-green-500" />
+                  </div>
+                  {/* Row 3 — Revenue + Enquiries */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <StatCard label="Total Revenue"     value={`₹${Number(stats.stats.total_revenue || 0).toLocaleString('en-IN')}`} icon="💰" color="bg-green-600" />
+                    <StatCard label="New Enquiries"     value={stats.stats.new_enquiries}      icon="🔵" color="bg-blue-400" />
+                    <StatCard label="Total Enquiries"   value={stats.stats.total_enquiries}    icon="📩" color="bg-orange-400" />
+                    <StatCard label="Available Vehicles" value={stats.stats.total_vehicles}    icon="🟢" color="bg-teal-500" />
                   </div>
 
                   {/* Popular Vehicles */}
