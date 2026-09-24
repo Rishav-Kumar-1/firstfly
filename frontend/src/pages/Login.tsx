@@ -1,9 +1,8 @@
-// Login.tsx — Sign in as Client or Admin
+// Login.tsx — STATIC VERSION (no API calls)
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
 
 export default function Login() {
   const navigate  = useNavigate();
@@ -28,6 +27,7 @@ export default function Login() {
     if (!form.email.trim()) errs.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email';
     if (!form.password) errs.password = 'Password is required';
+    else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -37,18 +37,38 @@ export default function Login() {
     if (!validate()) return;
     setLoading(true);
     setErrors({});
-    try {
-      const response = await authAPI.login({ email: form.email, password: form.password });
-      const userData = response.data.data;
+    
+    // Simulate async delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // STATIC LOGIN: Check hardcoded admin credentials
+    if (form.email === 'admin@travelgo.in' && form.password === 'password123') {
+      const userData = {
+        id: 1,
+        name: 'Admin',
+        email: 'admin@travelgo.in',
+        role: 'ADMIN' as const,
+        token: 'static-admin-token',
+      };
       login(userData);
-      if (userData.role === 'ADMIN') navigate('/admin', { replace: true });
-      else navigate(from, { replace: true });
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setErrors({ general: error.response?.data?.message || 'Login failed. Please try again.' });
-    } finally {
-      setLoading(false);
+      navigate('/admin', { replace: true });
+    } 
+    // Any other email+password (min 6 chars) → CUSTOMER
+    else if (form.password.length >= 6) {
+      const userData = {
+        id: Date.now(),
+        name: form.email.split('@')[0],
+        email: form.email,
+        role: 'CUSTOMER' as const,
+        token: 'static-customer-token',
+      };
+      login(userData);
+      navigate(from, { replace: true });
+    } else {
+      setErrors({ general: 'Invalid credentials' });
     }
+    
+    setLoading(false);
   };
 
   const inp = (hasErr?: string) =>
