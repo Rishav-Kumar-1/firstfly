@@ -4,15 +4,15 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SearchForm from '../components/SearchForm';
 
-const DEST_IMGS_MAP: Record<string, string> = {
-  Manali:    'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=500&q=75',
-  Shimla:    'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=500&q=75',
-  Rishikesh: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=500&q=75',
-  Jaipur:    'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=500&q=75',
-  Agra:      'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=500&q=75',
-  Kashmir:   'https://images.unsplash.com/photo-1579531403068-8d9f8ffcc0c3?w=500&q=75',
-  Mussoorie: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=75',
-  Varanasi:  'https://images.unsplash.com/photo-1561361058-c24e022a5f6d?w=500&q=75',
+const DEST_IMGS_MAP: Record<string, { img: string; id: number }> = {
+  Manali:    { img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=500&q=75', id: 1 },
+  Shimla:    { img: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=500&q=75', id: 2 },
+  Rishikesh: { img: 'https://images.unsplash.com/photo-1600100591316-fd4e5b5d2bf4?w=500&q=75', id: 3 },
+  Jaipur:    { img: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=500&q=75', id: 4 },
+  Agra:      { img: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=500&q=75', id: 5 },
+  Kashmir:   { img: 'https://images.unsplash.com/photo-1579531403068-8d9f8ffcc0c3?w=500&q=75', id: 6 },
+  Mussoorie: { img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=75', id: 7 },
+  Varanasi:  { img: 'https://images.unsplash.com/photo-1561361058-c24e022a5f6d?w=500&q=75', id: 9 },
 };
 
 // ─── FAQ ───────────────────────────────────────────
@@ -436,9 +436,9 @@ export default function Home() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #f3f4f6' }}>
                     <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>{p.duration}</span>
-                    <Link to="/contact"
+                    <Link to={`/packages/${p.id}`}
                       style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fff', background: '#f97316', padding: '6px 14px', borderRadius: 10 }}>
-                      Enquire
+                      View Details
                     </Link>
                   </div>
                 </div>
@@ -509,8 +509,8 @@ export default function Home() {
             <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.25rem)', fontWeight: 800, color: '#111827' }}>Popular Destinations</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {Object.entries(DEST_IMGS_MAP).map(([name, img]) => (
-              <Link key={name} to="/destinations" className="card"
+            {Object.entries(DEST_IMGS_MAP).map(([name, { img, id }]) => (
+              <Link key={name} to={`/destinations/${id}`} className="card"
                 style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', display: 'block', height: 180 }}>
                 <img src={img} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   onError={(e) => { (e.target as HTMLImageElement).src = '/vehicles/force-traveller-1.jpeg'; }} />
