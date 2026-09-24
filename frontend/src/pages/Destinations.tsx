@@ -18,7 +18,6 @@ const DESTINATIONS = [
 
 export default function Destinations() {
   const [q, setQ] = useState('');
-  const [selected, setSelected] = useState<typeof DESTINATIONS[0] | null>(null);
 
   const filtered = q
     ? DESTINATIONS.filter(d =>
@@ -47,8 +46,8 @@ export default function Destinations() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: '1.25rem' }}>
           {filtered.map(dest => (
-            <div key={dest.id} className="card" onClick={() => setSelected(dest)}
-              style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', height: 220, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
+            <Link key={dest.id} to={`/destinations/${dest.id}`} className="card"
+              style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', height: 220, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer', display: 'block' }}>
               <img src={dest.img} alt={dest.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&q=75'; }} />
@@ -60,7 +59,7 @@ export default function Destinations() {
               <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', color: '#fff', fontSize: '0.68rem', fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>
                 Explore →
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -72,39 +71,6 @@ export default function Destinations() {
           </div>
         )}
       </div>
-
-      {/* Destination Detail Modal */}
-      {selected && (
-        <div onClick={() => setSelected(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()}
-            style={{ background: '#fff', borderRadius: 24, overflow: 'hidden', maxWidth: 560, width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.4)' }}>
-            <div style={{ position: 'relative', height: 260 }}>
-              <img src={selected.img} alt={selected.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,0.6),transparent 55%)' }} />
-              <button onClick={() => setSelected(null)}
-                style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-              <div style={{ position: 'absolute', bottom: 16, left: 18 }}>
-                <h2 style={{ color: '#fff', fontFamily: 'Poppins,sans-serif', fontWeight: 800, fontSize: '1.5rem' }}>{selected.name}</h2>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem' }}>{selected.state}</p>
-              </div>
-            </div>
-            <div style={{ padding: '1.5rem' }}>
-              <p style={{ color: '#374151', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>{selected.desc}</p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <Link to="/vehicles" onClick={() => setSelected(null)}
-                  style={{ flex: 1, background: '#2563eb', color: '#fff', padding: '11px', borderRadius: 12, fontWeight: 700, textAlign: 'center', fontSize: '0.875rem', display: 'block' }}>
-                  🚌 Book a Vehicle
-                </Link>
-                <Link to="/contact" onClick={() => setSelected(null)}
-                  style={{ flex: 1, background: '#f97316', color: '#fff', padding: '11px', borderRadius: 12, fontWeight: 700, textAlign: 'center', fontSize: '0.875rem', display: 'block' }}>
-                  📞 Enquire Now
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

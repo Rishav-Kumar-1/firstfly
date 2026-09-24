@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { submitEnquiry, getAllEnquiries } = require('../controllers/enquiryController');
+const { submitEnquiry, getAllEnquiries, markEnquiryRead } = require('../controllers/enquiryController');
 const { authenticateUser, authorizeAdmin } = require('../middleware/auth');
 
-router.post('/', submitEnquiry);  // Public — anyone can contact us
-router.get('/',  authenticateUser, authorizeAdmin, getAllEnquiries);  // Admin only
+router.post('/', submitEnquiry);
+router.get('/',  authenticateUser, authorizeAdmin, getAllEnquiries);
+router.put('/:id/read', authenticateUser, authorizeAdmin, markEnquiryRead);
 
 module.exports = router;

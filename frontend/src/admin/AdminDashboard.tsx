@@ -214,6 +214,8 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [vehicleModal, setVehicleModal] = useState<{ open: boolean; vehicle: unknown }>({ open: false, vehicle: null });
   const [deletingVehicle, setDeletingVehicle] = useState<number | null>(null);
+  const [bookingStatusFilter, setBookingStatusFilter] = useState('');
+  const [markingRead, setMarkingRead] = useState<number | null>(null);
 
   // Load data when tab changes
   useEffect(() => {
@@ -276,6 +278,15 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  const handleMarkRead = async (id: number) => {
+    setMarkingRead(id);
+    try {
+      await enquiryAPI.markRead(id);
+      setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status: 'READ' } : e));
+    } catch { /* ignore */ }
+    finally { setMarkingRead(null); }
+  };
 
   // ── Sidebar ──
   const Sidebar = () => (
@@ -403,24 +414,43 @@ export default function AdminDashboard() {
               {/* ── BOOKINGS TAB ── */}
               {activeTab === 'bookings' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                    <p className="text-sm text-gray-500">{bookings.length} booking(s)</p>
-                    <button onClick={() => { setLoading(true); adminAPI.getAllBookings().then(r => setBookings(r.data.data || [])).catch(() => {}).finally(() => setLoading(false)); }}
-                      className="text-xs text-blue-600 hover:underline">↻ Refresh</button>
+                  <div className="p-4 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+                    {/* Status filter */}
+                    <div className="flex gap-1.5 flex-wrap flex-1">
+                      {['', 'PENDING','CONFIRMED','ASSIGNED','ONGOING','COMPLETED','CANCELLED'].map(s => (
+                        <button key={s} onClick={() => setBookingStatusFilter(s)}
+                          className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                            bookingStatusFilter === s
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'
+                          }`}>
+                          {s || 'All'}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-400">
+                        {bookings.filter(b => !bookingStatusFilter || b.booking_status === bookingStatusFilter).length} result(s)
+                      </span>
+                      <button onClick={() => { setLoading(true); adminAPI.getAllBookings().then(r => setBookings(r.data.data || [])).catch(() => {}).finally(() => setLoading(false)); }}
+                        className="text-xs text-blue-600 hover:underline">↻ Refresh</button>
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          {['Reference','Customer','Phone','Route','Date','Vehicle','Passengers','Status','Action'].map(h => (
+                          {['Reference','Customer','Phone','Route','Date','Vehicle','Pax','Notes','Status','Action'].map(h => (
                             <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {bookings.length === 0 ? (
-                          <tr><td colSpan={9} className="text-center py-12 text-gray-400">No bookings yet</td></tr>
-                        ) : bookings.map(b => (
+                        {bookings.filter(b => !bookingStatusFilter || b.booking_status === bookingStatusFilter).length === 0 ? (
+                          <tr><td colSpan={10} className="text-center py-12 text-gray-400">No bookings found</td></tr>
+                        ) : bookings
+                            .filter(b => !bookingStatusFilter || b.booking_status === bookingStatusFilter)
+                            .map(b => (
                           <tr key={b.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-3 font-bold text-blue-600 whitespace-nowrap">{b.booking_reference}</td>
                             <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{b.customer_name}</td>
@@ -431,6 +461,12 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{b.vehicle_name}</td>
                             <td className="px-4 py-3 text-center text-gray-700">{b.passengers}</td>
+                            <td className="px-4 py-3 max-w-[160px]">
+                              {b.notes
+                                ? <span className="text-xs text-gray-600 bg-yellow-50 border border-yellow-100 px-2 py-1 rounded-lg block truncate" title={b.notes}>{b.notes}</span>
+                                : <span className="text-xs text-gray-300">—</span>
+                              }
+                            </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[b.booking_status]}`}>
                                 {b.booking_status}
@@ -574,7 +610,7 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div className="flex-1 min-w-0">
                           {/* Header row */}
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                               {(e.name || 'U')[0].toUpperCase()}
                             </div>
@@ -614,6 +650,12 @@ export default function AdminDashboard() {
                                 className="flex items-center gap-1.5 text-xs font-semibold text-white bg-green-600 px-3 py-1.5 rounded-lg hover:bg-green-700">
                                 💬 WhatsApp
                               </a>
+                            )}
+                            {e.status === 'NEW' && (
+                              <button onClick={() => handleMarkRead(e.id)} disabled={markingRead === e.id}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-50">
+                                {markingRead === e.id ? '...' : '✓ Mark as Read'}
+                              </button>
                             )}
                           </div>
                         </div>

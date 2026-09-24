@@ -30,4 +30,13 @@ const getAllEnquiries = async (req, res) => {
   }
 };
 
-module.exports = { submitEnquiry, getAllEnquiries };
+const markEnquiryRead = async (req, res) => {
+  try {
+    await db.query("UPDATE enquiries SET status = 'READ' WHERE id = ?", [req.params.id]);
+    return sendSuccess(res, null, 'Enquiry marked as read');
+  } catch (error) {
+    return sendError(res, 'Failed to update enquiry', 500);
+  }
+};
+
+module.exports = { submitEnquiry, getAllEnquiries, markEnquiryRead };

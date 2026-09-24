@@ -119,8 +119,9 @@ export const reviewAPI = {
 // ENQUIRY APIs
 // ─────────────────────────────────────────────
 export const enquiryAPI = {
-  submit: (data: object) => api.post('/enquiries', data),
-  getAll: () => api.get('/enquiries'),
+  submit:          (data: object) => api.post('/enquiries', data),
+  getAll:          () => api.get('/enquiries'),
+  markRead:        (id: number) => api.put(`/enquiries/${id}/read`, {}),
 };
 
 // Admin APIs
